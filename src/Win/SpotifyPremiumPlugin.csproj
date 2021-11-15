@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D7B32254-4248-4A43-B127-706810EFCAFA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Loupedeck.SpotifyPremiumPlugin</RootNamespace>
+    <AssemblyName>SpotifyPremiumPlugin</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>
+    </BaseIntermediateOutputPath>
+    <BaseOutputPath>bin</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(LocalAppData)\Loupedeck\Plugins\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PluginApi, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Loupedeck\Loupedeck2\PluginApi.dll</HintPath>
+    </Reference>
+    <Reference Include="SpotifyAPI.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Loupedeck\Loupedeck2\SpotifyAPI.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="SpotifyAPI.Web.Auth, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Loupedeck\Loupedeck2\SpotifyAPI.Web.Auth.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Adjustments\Playback\PlayAndNavigateAdjustment.cs" />
+    <Compile Include="CommandFolders\DeviceSelectorCommandFolder.cs" />
+    <Compile Include="Commands\Playback\ChangeRepeatStateCommand.cs" />
+    <Compile Include="Commands\Playback\ShufflePlayCommand.cs" />
+    <Compile Include="Commands\Playback\PreviousTrackCommand.cs" />
+    <Compile Include="Commands\Playback\NextTrackCommand.cs" />
+    <Compile Include="Commands\ToggleLikeCommand.cs" />
+    <Compile Include="Adjustments\Volume\SpotifyVolumeAdjustment.cs" />
+    <Compile Include="Commands\Volume\UnmuteCommand.cs" />
+    <Compile Include="Commands\Volume\MuteCommand.cs" />
+    <Compile Include="ParameterizedCommands\SaveToPlaylistCommand.cs" />
+    <Compile Include="ParameterizedCommands\DirectVolumeCommand.cs" />
+    <Compile Include="ParameterizedCommands\StartPlaylistCommand.cs" />
+    <Compile Include="SpotifyPremiumPlugin.ApiResponse.cs" />
+    <Compile Include="SpotifyPremiumPlugin.Api.cs" />
+    <Compile Include="SpotifyPremiumPlugin.DevicesSelector.cs" />
+    <Compile Include="SpotifyPremiumPlugin.Installer.cs" />
+    <Compile Include="Commands\LoginToSpotifyCommand.cs" />
+    <Compile Include="Commands\Playback\TogglePlaybackCommand.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="SpotifyPremiumApplication.cs" />
+    <Compile Include="SpotifyPremiumPlugin.cs" />
+    <Compile Include="Commands\Volume\ToggleMuteCommand.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PluginConfiguration.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\PluginIcon16x16.png" />
+    <EmbeddedResource Include="Icons\PluginIcon256x256.png" />
+    <EmbeddedResource Include="Icons\PluginIcon32x32.png" />
+    <EmbeddedResource Include="Icons\PluginIcon48x48.png" />
+    <EmbeddedResource Include="Icons\Width50\Browse.png" />
+    <EmbeddedResource Include="Icons\Width50\Devices.png" />
+    <EmbeddedResource Include="Icons\Width50\Home2.png" />
+    <EmbeddedResource Include="Icons\Width50\PlayAndNavigateTracks.png" />
+    <EmbeddedResource Include="Icons\Width50\Playlist.png" />
+    <EmbeddedResource Include="Icons\Width50\Radio.png" />
+    <EmbeddedResource Include="Icons\Width50\Repeat.png" />
+    <EmbeddedResource Include="Icons\Width50\RepeatList.png" />
+    <EmbeddedResource Include="Icons\Width50\RepeatOff.png" />
+    <EmbeddedResource Include="Icons\Width50\Share.png" />
+    <EmbeddedResource Include="Icons\Width50\Shuffle.png" />
+    <EmbeddedResource Include="Icons\Width50\ShuffleList.png" />
+    <EmbeddedResource Include="Icons\Width50\ShuffleOff.png" />
+    <EmbeddedResource Include="Icons\Width50\SongDislike.png" />
+    <EmbeddedResource Include="Icons\Width50\SongLike.png" />
+    <EmbeddedResource Include="Icons\Width50\Volume.png" />
+    <EmbeddedResource Include="Icons\Width80\Browse.png" />
+    <EmbeddedResource Include="Icons\Width80\Devices.png" />
+    <EmbeddedResource Include="Icons\Width80\Home2.png" />
+    <EmbeddedResource Include="Icons\Width80\PlayAndNavigateTracks.png" />
+    <EmbeddedResource Include="Icons\Width80\Playlist.png" />
+    <EmbeddedResource Include="Icons\Width80\Radio.png" />
+    <EmbeddedResource Include="Icons\Width80\Repeat.png" />
+    <EmbeddedResource Include="Icons\Width80\RepeatList.png" />
+    <EmbeddedResource Include="Icons\Width80\RepeatOff.png" />
+    <EmbeddedResource Include="Icons\Width80\Share.png" />
+    <EmbeddedResource Include="Icons\Width80\Shuffle.png" />
+    <EmbeddedResource Include="Icons\Width80\ShuffleList.png" />
+    <EmbeddedResource Include="Icons\Width80\ShuffleOff.png" />
+    <EmbeddedResource Include="Icons\Width80\SongDislike.png" />
+    <EmbeddedResource Include="Icons\Width80\SongLike.png" />
+    <EmbeddedResource Include="Icons\Width80\Volume.png" />
+    <EmbeddedResource Include="Icons\Width50\MuteVolume.png" />
+    <EmbeddedResource Include="Icons\Width50\NextTrack.png" />
+    <EmbeddedResource Include="Icons\Width50\Pause.png" />
+    <EmbeddedResource Include="Icons\Width50\Play.png" />
+    <EmbeddedResource Include="Icons\Width50\PlayPause.png" />
+    <EmbeddedResource Include="Icons\Width50\PlayStop.png" />
+    <EmbeddedResource Include="Icons\Width50\PreviousTrack.png" />
+    <EmbeddedResource Include="Icons\Width80\MuteVolume.png" />
+    <EmbeddedResource Include="Icons\Width80\NextTrack.png" />
+    <EmbeddedResource Include="Icons\Width80\Pause.png" />
+    <EmbeddedResource Include="Icons\Width80\Play.png" />
+    <EmbeddedResource Include="Icons\Width80\PlayPause.png" />
+    <EmbeddedResource Include="Icons\Width80\PlayStop.png" />
+    <EmbeddedResource Include="Icons\Width80\PreviousTrack.png" />
+    <Content Include="spotify-client-template.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
