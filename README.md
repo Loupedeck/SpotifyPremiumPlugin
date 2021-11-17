@@ -1,6 +1,6 @@
 # Spotify Premium Plugin
 
-Spotify plugin for Loupedeck software, based on [Loupedeck Plugin SDK](https://github.com/Loupedeck/Loupedeck4PluginSdkCopy/wiki). See [Developing plugins for Loupedeck - Process overview](https://github.com/Loupedeck/Loupedeck4PluginSdkCopy/wiki/Process-overview)
+Spotify plugin for Loupedeck software, based on [Loupedeck Plugin SDK](https://developer.loupedeck.com/docs). See [Developing plugins for Loupedeck - Process overview](https://developer.loupedeck.com/docs/Process-overview)
 
 It is recommended to use Loupedeck software version 5.0 or newer.
 
