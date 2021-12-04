@@ -1,10 +1,8 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 {
     using System;
-
-    using Commands;
 
     using SpotifyAPI.Web.Models;
 

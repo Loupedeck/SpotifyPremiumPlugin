@@ -1,6 +1,6 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 {
     using System;
 

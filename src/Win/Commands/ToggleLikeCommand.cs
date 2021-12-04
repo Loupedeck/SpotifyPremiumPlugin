@@ -1,13 +1,10 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.SpotifyPremiumPlugin.Commands
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Commands;
-
 
     internal class ToggleLikeCommand : SpotifyCommand
     {

@@ -1,12 +1,8 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.SpotifyPremiumPlugin.Commands
 {
     using System;
-
-    using Commands;
-
-    using Loupedeck;
 
     internal class LoginToSpotifyCommand : SpotifyCommand
     {
