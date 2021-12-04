@@ -10,47 +10,48 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
     internal class ChangeRepeatStateCommand : SpotifyCommand
     {
-        private RepeatState _repeatState;
+        private RepeatState _state;
+
+        public RepeatState State
+        {
+            get => this._state;
+            private set
+            {
+                this._state = value;
+                this.ActionImageChanged();
+            }
+        }
 
         public ChangeRepeatStateCommand()
-            : base(
-                  "Change Repeat State",
-                  "Change Repeat State description",
-                  "Playback")
+            : base("Change Repeat State", "Change Repeat State description", "Playback")
         {
+        }
+
+        public override string IconResource
+        {
+            get
+            {
+                switch (State)
+                {
+                    case RepeatState.Off:
+                        return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
+
+                    case RepeatState.Context:
+                        return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatList.png";
+
+                    case RepeatState.Track:
+                        return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Repeat.png";
+
+                    default:
+                        // Set plugin status and message
+                        return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
+                }
+            }
         }
 
         protected override void RunCommand(String actionParameter)
         {
-            this._repeatState= Wrapper.ChangeRepeatState();
-            this.ActionImageChanged();
-        }
-
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            String icon;
-            switch (this._repeatState)
-            {
-                case RepeatState.Off:
-                    icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
-                    break;
-
-                case RepeatState.Context:
-                    icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatList.png";
-                    break;
-
-                case RepeatState.Track:
-                    icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Repeat.png";
-                    break;
-
-                default:
-                    // Set plugin status and message
-                    icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
-                    break;
-            }
-
-            var bitmapImage = EmbeddedResources.ReadImage(icon);
-            return bitmapImage;
+            this.State = Wrapper.ChangeRepeatState();
         }
     }
 }

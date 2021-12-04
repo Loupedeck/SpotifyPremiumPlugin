@@ -9,10 +9,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
     internal class PreviousTrackCommand : SpotifyCommand
     {
         public PreviousTrackCommand()
-            : base(
-                  "Previous Track",
-                  "Previous Track description",
-                  "Playback")
+            : base("Previous Track", "Previous Track description", "Playback")
         {
         }
 
@@ -21,10 +18,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
             Wrapper.SkipPlaybackToPrevious();
         }
 
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png");
-            return bitmapImage;
-        }
+        public override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png";
    }
 }

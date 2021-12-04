@@ -10,13 +10,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
     {
         private Boolean _isPlaying = true;
 
-        public TogglePlaybackCommand()
-            : base(
-                  "Toggle Playback",
-                  "Toggles audio playback",
-                  "Playback")
-        {
-        }
+        public TogglePlaybackCommand() : base("Toggle Playback", "Toggles audio playback", "Playback") { }
 
         protected override void RunCommand(String actionParameter)
         {
@@ -25,11 +19,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
             this.ActionImageChanged();
         }
 
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            return this._isPlaying ?
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png") :
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png");
-        }
+        public override string IconResource => this._isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
     }
 }

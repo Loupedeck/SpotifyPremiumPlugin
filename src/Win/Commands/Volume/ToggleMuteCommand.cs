@@ -8,13 +8,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
     {
         private Boolean currentlyMuted;
 
-        public ToggleMuteCommand()
-            : base(
-                  "Toggle Mute",
-                  "Toggles audio mute state",
-                  "Spotify Volume")
-        {
-        }
+        public ToggleMuteCommand() : base("Toggle Mute", "Toggles audio mute state", "Spotify Volume") { }
 
         protected override void RunCommand(String actionParameter)
         {
@@ -23,12 +17,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
             this.ActionImageChanged();
         }
 
+        public override string IconResource => this.currentlyMuted ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
 
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            return this.currentlyMuted ?
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png") : 
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png");
-        }
     }
 }

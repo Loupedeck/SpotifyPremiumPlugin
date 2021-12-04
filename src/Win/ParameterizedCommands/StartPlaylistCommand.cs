@@ -7,8 +7,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
     using Commands;
 
-    using SpotifyAPI.Web.Models;
-
     internal class StartPlaylistCommand : SpotifyCommand
     {
         public StartPlaylistCommand() : base()

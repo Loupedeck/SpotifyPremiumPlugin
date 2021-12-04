@@ -6,13 +6,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands
 
     internal class LoginToSpotifyCommand : SpotifyCommand
     {
-        public LoginToSpotifyCommand()
-            : base(
-                  "Login to Spotify",
-                  "Premium user login to Spotify API",
-                  "Login")
-        {
-        }
+        public LoginToSpotifyCommand() : base("Login to Spotify", "Premium user login to Spotify API", "Login") { }
 
         protected override void RunCommand(String actionParameter) => Wrapper.LoginToSpotify();
     }

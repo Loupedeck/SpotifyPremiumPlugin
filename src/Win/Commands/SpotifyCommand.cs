@@ -15,5 +15,8 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands
 
         protected SpotifyCommand() { }
 
+        public virtual string IconResource { get; }
+
+        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize) => EmbeddedResources.ReadImage(IconResource);
     }
 }
