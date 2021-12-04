@@ -1,52 +1,19 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-    using SpotifyAPI.Web.Models;
-
-    internal class ShufflePlayCommand : PluginDynamicCommand
+    internal class ShufflePlayCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
+        private bool ShuffleState { get; set; }
 
-        private Boolean _shuffleState;
+        public ShufflePlayCommand() : base("Shuffle Play", "Shuffle Play description", "Playback") { }
 
-        public ShufflePlayCommand()
-            : base(
-                  "Shuffle Play",
-                  "Shuffle Play description",
-                  "Playback")
+        protected override void RunCommand(string actionParameter)
         {
+            ShuffleState = Wrapper.ShufflePlay();
+            ActionImageChanged();
         }
 
-        protected override void RunCommand(String actionParameter)
-        {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.ShufflePlay);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify ShufflePlayCommand action obtain an error: ", e);
-            }
-        }
-
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            return this._shuffleState ?
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Shuffle.png") :
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.ShuffleOff.png");
-        }
-
-        public ErrorResponse ShufflePlay()
-        {
-            var playback = this.SpotifyPremiumPlugin.Api.GetPlayback();
-            this._shuffleState = !playback.ShuffleState;
-            var response = this.SpotifyPremiumPlugin.Api.SetShuffle(this._shuffleState, this.SpotifyPremiumPlugin.CurrentDeviceId);
-
-            this.ActionImageChanged();
-
-            return response;
-        }
+        protected override string IconResource => ShuffleState ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Shuffle.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.ShuffleOff.png";
     }
 }

@@ -5,7 +5,7 @@ Spotify plugin for Loupedeck software, based on [Loupedeck Plugin SDK](https://d
 It is recommended to use Loupedeck software version 5.0 or newer.
 
 ## Restrictions for Spotify Plugin
-Loupedeck software comes with an "internal" Spotify Premium plugin that does not use SDK Plugin API. [Spotify Premium SDK](https://github.com/Loupedeck/SpotifyPremiumPlugin) solution uses SDK Plugin API and contains the same functionality as the "internal" plugin.
+Loupedeck software comes with an "internal" build of the SpotifyAPI.Web and SpotifyAPI.Web.Auth. [Spotify Premium SDK](https://github.com/Loupedeck/SpotifyPremiumPlugin) solution uses SDK Plugin API and contains the same functionality as the "internal" plugin.
 
 🛑 It is not possible to use both "internal" and SDK Spotify Premium plugin versions at the same time. Select only Spotify Premium SDK from Manage Plugins.  
 
@@ -13,7 +13,9 @@ Loupedeck software comes with an "internal" Spotify Premium plugin that does not
   <img src="images/ManagePlugins.png" width="300" title="hover text">
 </p>
 
-The reason for this is that currently SDK plugins cannot use the same dll as Loupedeck application is using. In this case e.g., a modified version of [SpotifyAPI-NET](https://github.com/Loupedeck/SpotifyAPI-NET) which is used to communicate with Spotify Web API. SDK Plugin must reference the [SpotifyAPI-NET](https://github.com/Loupedeck/SpotifyAPI-NET) dlls within Loupedeck installation:
+SDK Plugins will not load or function properly if they use an assembly which has a conflicting version to as assembly which Loupedeck is already using.
+
+In this case e.g., a modified version of [SpotifyAPI-NET](https://github.com/Loupedeck/SpotifyAPI-NET) which is used to communicate with Spotify Web API. SDK Plugin must reference the [SpotifyAPI-NET](https://github.com/Loupedeck/SpotifyAPI-NET) dlls within Loupedeck installation:
 ```csharp
 <INSTALLATION PATH>\Loupedeck\Loupedeck2\SpotifyAPI.Web.dll
 <INSTALLATION PATH>\Loupedeck\Loupedeck2\SpotifyAPI.Web.Auth.dll

@@ -1,53 +1,20 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-    using SpotifyAPI.Web.Models;
-
-    internal class TogglePlaybackCommand : PluginDynamicCommand
+    internal class TogglePlaybackCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
+        private bool isPlaying = true;
 
-        private Boolean _isPlaying = true;
+        public TogglePlaybackCommand() : base("Toggle Playback", "Toggles audio playback", "Playback") { }
 
-        public TogglePlaybackCommand()
-            : base(
-                  "Toggle Playback",
-                  "Toggles audio playback",
-                  "Playback")
+        protected override void RunCommand(string actionParameter)
         {
+            isPlaying = Wrapper.TogglePlayback();
+
+            ActionImageChanged();
         }
 
-        protected override void RunCommand(String actionParameter)
-        {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.TogglePlayback);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify TogglePlayback action obtain an error: ", e);
-            }
-        }
-
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            return this._isPlaying ?
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png") :
-                EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png");
-        }
-
-        public ErrorResponse TogglePlayback()
-        {
-            var playback = this.SpotifyPremiumPlugin.Api.GetPlayback();
-            this._isPlaying = playback.IsPlaying;
-
-            this.ActionImageChanged();
-
-            return playback.IsPlaying
-                ? this.SpotifyPremiumPlugin.Api.PausePlayback(this.SpotifyPremiumPlugin.CurrentDeviceId)
-                : this.SpotifyPremiumPlugin.Api.ResumePlayback(this.SpotifyPremiumPlugin.CurrentDeviceId, String.Empty, null, String.Empty, 0);
-        }
+        protected override string IconResource => isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
     }
 }

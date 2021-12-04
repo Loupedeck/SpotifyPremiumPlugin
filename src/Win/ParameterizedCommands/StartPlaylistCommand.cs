@@ -1,48 +1,40 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
+#region Usings
+
+using System.Collections.Generic;
+using System.Linq;
+
+using Loupedeck.Plugins.SpotifyPremium.Commands;
+
+using SpotifyAPI.Web.Models;
+
+#endregion
+
+namespace Loupedeck.Plugins.SpotifyPremium.ParameterizedCommands
 {
-    using System;
-    using System.Linq;
-    using SpotifyAPI.Web.Models;
-
-    internal class StartPlaylistCommand : PluginDynamicCommand
+    internal class StartPlaylistCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         public StartPlaylistCommand()
-            : base()
         {
             // Profile actions do not belong to a group in the current UI, they are on the top level
-            this.DisplayName = "Start Playlist"; // so this will be shown as "group name" for parameterized commands
-            this.GroupName = "Not used";
+            DisplayName = "Start Playlist"; // so this will be shown as "group name" for parameterized commands
+            GroupName = "Not used";
 
-            this.MakeProfileAction("list;Select playlist to play:");
+            MakeProfileAction("list;Select playlist to play:");
         }
 
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.StartPlaylist, actionParameter);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify StartPlaylistCommand action obtain an error: ", e);
-            }
-        }
-
-        public ErrorResponse StartPlaylist(String contextUri)
-        {
-            return this.SpotifyPremiumPlugin.Api.ResumePlayback(this.SpotifyPremiumPlugin.CurrentDeviceId, contextUri, null, String.Empty);
+            Wrapper.StartPlaylist(actionParameter);
         }
 
         protected override PluginActionParameter[] GetParameters()
         {
-            var playlists = this.SpotifyPremiumPlugin.GetAllPlaylists();
-            return playlists?.Items
-                        .Select(x => new PluginActionParameter(x.Uri, x.Name, String.Empty))
-                        .ToArray();
+            List<SimplePlaylist> playlists = Wrapper.GetAllPlaylists();
+
+            return playlists?.Select(x => new PluginActionParameter(x.Uri, x.Name, string.Empty))
+                .ToArray();
         }
     }
 }

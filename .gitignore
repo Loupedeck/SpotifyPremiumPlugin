@@ -309,3 +309,7 @@ testem.log
 *.xcactivitylog
 
 *.DotSettings
+/src/.upgrade-assistant
+/src/AnalysisReport.sarif
+/src/upgrade-assistant.clef
+/src.backup/win
