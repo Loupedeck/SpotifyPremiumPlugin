@@ -3,12 +3,13 @@
 namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 {
     using System;
+
+    using Commands;
+
     using SpotifyAPI.Web.Models;
 
-    internal class DirectVolumeCommand : PluginDynamicCommand
+    internal class DirectVolumeCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         public DirectVolumeCommand()
             : base()
         {

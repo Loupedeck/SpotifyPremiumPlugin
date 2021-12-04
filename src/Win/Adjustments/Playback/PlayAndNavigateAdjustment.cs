@@ -3,9 +3,12 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Adjustments;
+
     using SpotifyAPI.Web.Models;
 
-    internal class PlayAndNavigateAdjustment : PluginDynamicAdjustment
+    internal class PlayAndNavigateAdjustment : SpotifyAdjustment
     {
         public PlayAndNavigateAdjustment()
             : base(
@@ -15,8 +18,6 @@ namespace Loupedeck.SpotifyPremiumPlugin
                   true)
         {
         }
-
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
 
         protected override void ApplyAdjustment(String actionParameter, Int32 ticks)
         {

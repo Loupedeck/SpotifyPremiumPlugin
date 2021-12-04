@@ -3,13 +3,14 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Commands;
+
     using SpotifyAPI.Web.Enums;
     using SpotifyAPI.Web.Models;
 
-    internal class ChangeRepeatStateCommand : PluginDynamicCommand
+    internal class ChangeRepeatStateCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         private RepeatState _repeatState;
 
         public ChangeRepeatStateCommand()

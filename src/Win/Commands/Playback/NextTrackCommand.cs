@@ -3,12 +3,13 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Commands;
+
     using SpotifyAPI.Web.Models;
 
-    internal class NextTrackCommand : PluginDynamicCommand
+    internal class NextTrackCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         public NextTrackCommand()
             : base(
                   "Next Track",

@@ -4,12 +4,13 @@ namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
     using System.Timers;
+
+    using Adjustments;
+
     using SpotifyAPI.Web.Models;
 
-    internal class SpotifyVolumeAdjustment : PluginDynamicAdjustment
+    internal class SpotifyVolumeAdjustment : SpotifyAdjustment
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         private Boolean _volumeBlocked;
 
         private Timer _volumeBlockedTimer;

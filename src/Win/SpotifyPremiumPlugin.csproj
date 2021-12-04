@@ -63,11 +63,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adjustments\Playback\PlayAndNavigateAdjustment.cs" />
+    <Compile Include="Adjustments\SpotifyAdjustment.cs" />
     <Compile Include="CommandFolders\DeviceSelectorCommandFolder.cs" />
     <Compile Include="Commands\Playback\ChangeRepeatStateCommand.cs" />
     <Compile Include="Commands\Playback\ShufflePlayCommand.cs" />
     <Compile Include="Commands\Playback\PreviousTrackCommand.cs" />
     <Compile Include="Commands\Playback\NextTrackCommand.cs" />
+    <Compile Include="Commands\SpotifyCommand.cs" />
     <Compile Include="Commands\ToggleLikeCommand.cs" />
     <Compile Include="Adjustments\Volume\SpotifyVolumeAdjustment.cs" />
     <Compile Include="Commands\Volume\UnmuteCommand.cs" />

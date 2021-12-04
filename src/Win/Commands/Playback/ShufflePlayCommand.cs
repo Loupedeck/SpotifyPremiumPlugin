@@ -3,12 +3,13 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Commands;
+
     using SpotifyAPI.Web.Models;
 
-    internal class ShufflePlayCommand : PluginDynamicCommand
+    internal class ShufflePlayCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         private Boolean _shuffleState;
 
         public ShufflePlayCommand()

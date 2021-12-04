@@ -3,12 +3,13 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Commands;
+
     using SpotifyAPI.Web.Models;
 
-    internal class ToggleMuteCommand : PluginDynamicCommand
+    internal class ToggleMuteCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         private Boolean _mute;
 
         public ToggleMuteCommand()

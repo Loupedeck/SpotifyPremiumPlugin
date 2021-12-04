@@ -3,9 +3,12 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+
+    using Commands;
+
     using Loupedeck;
 
-    internal class LoginToSpotifyCommand : PluginDynamicCommand
+    internal class LoginToSpotifyCommand : SpotifyCommand
     {
         public LoginToSpotifyCommand()
             : base(
@@ -15,6 +18,6 @@ namespace Loupedeck.SpotifyPremiumPlugin
         {
         }
 
-        protected override void RunCommand(String actionParameter) => (this.Plugin as SpotifyPremiumPlugin).LoginToSpotify();
+        protected override void RunCommand(String actionParameter) => this.SpotifyPremiumPlugin.LoginToSpotify();
     }
 }

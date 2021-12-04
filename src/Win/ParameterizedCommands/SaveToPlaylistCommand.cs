@@ -4,14 +4,14 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 {
     using System;
     using System.Linq;
+
+    using Commands;
+
     using SpotifyAPI.Web.Models;
 
-    internal class SaveToPlaylistCommand : PluginDynamicCommand
+    internal class SaveToPlaylistCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
-        public SaveToPlaylistCommand()
-            : base()
+        public SaveToPlaylistCommand() : base()
         {
             // Profile actions do not belong to a group in the current UI, they are on the top level
             this.DisplayName = "Save To Playlist"; // so this will be shown as "group name" for parameterized commands

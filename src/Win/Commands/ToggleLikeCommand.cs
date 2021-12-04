@@ -6,10 +6,11 @@ namespace Loupedeck.SpotifyPremiumPlugin
     using System.Collections.Generic;
     using System.Linq;
 
-    internal class ToggleLikeCommand : PluginDynamicCommand
-    {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
+    using Commands;
 
+
+    internal class ToggleLikeCommand : SpotifyCommand
+    {
         private Boolean _isLiked = true;
 
         public ToggleLikeCommand()
