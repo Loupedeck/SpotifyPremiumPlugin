@@ -1,25 +1,25 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
+#region Usings
+
+using SpotifyAPI.Web.Enums;
+
+#endregion
+
 namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-
-    using SpotifyAPI.Web.Enums;
-
     internal class ChangeRepeatStateCommand : SpotifyCommand
     {
         private RepeatState State { get; set; }
 
         public ChangeRepeatStateCommand()
-            : base("Change Repeat State", "Change Repeat State description", "Playback")
-        {
-        }
+            : base("Change Repeat State", "Change Repeat State description", "Playback") { }
 
         protected override string IconResource
         {
             get
             {
-                switch (this.State)
+                switch (State)
                 {
                     case RepeatState.Off:
                         return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
@@ -37,10 +37,10 @@ namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
             }
         }
 
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            this.State = this.Wrapper.ChangeRepeatState();
-            this.ActionImageChanged();
+            State = Wrapper.ChangeRepeatState();
+            ActionImageChanged();
         }
     }
 }

@@ -2,20 +2,16 @@
 
 namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-
     internal class PreviousTrackCommand : SpotifyCommand
     {
         public PreviousTrackCommand()
-            : base("Previous Track", "Previous Track description", "Playback")
-        {
-        }
+            : base("Previous Track", "Previous Track description", "Playback") { }
 
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            this.Wrapper.SkipPlaybackToPrevious();
+            Wrapper.SkipPlaybackToPrevious();
         }
 
         protected override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png";
-   }
+    }
 }

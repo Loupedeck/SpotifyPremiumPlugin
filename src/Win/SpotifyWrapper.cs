@@ -1,82 +1,87 @@
-﻿
+﻿#region Usings
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Timers;
+
+using Newtonsoft.Json;
+
+using SpotifyAPI.Web;
+using SpotifyAPI.Web.Auth;
+using SpotifyAPI.Web.Enums;
+using SpotifyAPI.Web.Models;
+
+#endregion
+
 namespace Loupedeck.Plugins.SpotifyPremium
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Security.Cryptography;
-    using System.Text;
-    using System.Timers;
-
-    using Newtonsoft.Json;
-
-    using SpotifyAPI.Web;
-    using SpotifyAPI.Web.Auth;
-    using SpotifyAPI.Web.Enums;
-    using SpotifyAPI.Web.Models;
-
     internal sealed class SpotifyWrapper : IDisposable
     {
-        private const String CLIENT_ID = "ClientId";
-        private const String CLIENT_SECRET = "ClientSecret";
-        private const String TCP_PORTS = "TcpPorts";
+        private const string CLIENT_ID = "ClientId";
+        private const string CLIENT_SECRET = "ClientSecret";
+        private const string TCP_PORTS = "TcpPorts";
 
         private SpotifyPremiumPlugin Plugin { get; }
 
         internal SpotifyWrapper(SpotifyPremiumPlugin plugin)
         {
-            this.Plugin = plugin;
-            this.SpotifyConfiguration();
-            this.CurrentDeviceId = plugin.GetCachedDeviceID();
+            Plugin = plugin;
+            SpotifyConfiguration();
+            CurrentDeviceId = plugin.GetCachedDeviceID();
         }
-        
+
         private static Token token = new Token();
         private static AuthorizationCodeAuth auth;
-        private static String spotifyTokenFilePath;
+        private static string spotifyTokenFilePath;
 
-        private static Dictionary<String, String> _spotifyConfiguration;
+        private static Dictionary<string, string> _spotifyConfiguration;
 
-        private List<Int32> tcpPorts = new List<Int32>();
+        private List<int> tcpPorts = new List<int>();
 
         private SpotifyWebAPI Api { get; set; }
 
-        private String CurrentDeviceId
+        private string CurrentDeviceId
         {
-            get => this._currentDeviceId;
+            get => _currentDeviceId;
             set
             {
-                this._currentDeviceId = value;
-                this.Plugin.SaveDeviceToCache(value);
+                _currentDeviceId = value;
+                Plugin.SaveDeviceToCache(value);
             }
         }
-        
+
         #region Authentication & Configuration
 
-        private Boolean SpotifyApiConnectionOk()
+        private bool SpotifyApiConnectionOk()
         {
-            if (this.Api == null)
+            if (Api == null)
             {
                 // User not logged in -> Automatically start login
-                this.LoginToSpotify();
+                LoginToSpotify();
 
                 // and skip action for now
                 return false;
             }
-            else if (token != null && DateTime.Now > token.CreateDate.AddSeconds(token.ExpiresIn) && !String.IsNullOrEmpty(token.RefreshToken))
+
+            if (token != null && DateTime.Now > token.CreateDate.AddSeconds(token.ExpiresIn) && !string.IsNullOrEmpty(token.RefreshToken))
             {
-                this.RefreshToken(token.RefreshToken);
+                RefreshToken(token.RefreshToken);
             }
 
             return true;
         }
 
-        private Boolean ReadConfigurationFile()
+        private bool ReadConfigurationFile()
         {
             // Get Spotify App configuration from spotify-client.txt file: client id and client secret
             // Windows path: %LOCALAPPDATA%/Loupedeck/PluginData/SpotifyPremium/spotify-client.txt
-            var spotifyClientConfigurationFile = this.Plugin.ClientConfigurationFilePath;
+            string spotifyClientConfigurationFile = Plugin.ClientConfigurationFilePath;
+
             if (!File.Exists(spotifyClientConfigurationFile))
             {
                 // Check path
@@ -85,41 +90,41 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 // Create the file
                 using (FileStream fs = File.Create(spotifyClientConfigurationFile))
                 {
-                    var info = new UTF8Encoding(true).GetBytes($"{CLIENT_ID}{Environment.NewLine}{CLIENT_SECRET}{Environment.NewLine}{TCP_PORTS}");
+                    byte[] info = new UTF8Encoding(true).GetBytes($"{CLIENT_ID}{Environment.NewLine}{CLIENT_SECRET}{Environment.NewLine}{TCP_PORTS}");
 
                     // Add parameter titles to file.
                     fs.Write(info, 0, info.Length);
                 }
 
-                this.OnPluginStatusChanged(PluginStatus.Error, "Spotify configuration is missing. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                OnPluginStatusChanged(PluginStatus.Error, "Spotify configuration is missing. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
             // Read configuration file, skip # comments, trim key and value
             _spotifyConfiguration = File.ReadAllLines(spotifyClientConfigurationFile)
-                                                .Where(x => !x.StartsWith("#", StringComparison.InvariantCulture))
-                                                .Select(x => x.Split('='))
-                                                .ToDictionary(x => x[0].Trim(), x => x[1].Trim());
+                .Where(x => !x.StartsWith("#", StringComparison.InvariantCulture))
+                .Select(x => x.Split('='))
+                .ToDictionary(x => x[0].Trim(), x => x[1].Trim());
 
             if (!(_spotifyConfiguration.ContainsKey(CLIENT_ID) &&
-                _spotifyConfiguration.ContainsKey(CLIENT_SECRET) &&
-                _spotifyConfiguration.ContainsKey(TCP_PORTS)))
+                  _spotifyConfiguration.ContainsKey(CLIENT_SECRET) &&
+                  _spotifyConfiguration.ContainsKey(TCP_PORTS)))
             {
-                this.OnPluginStatusChanged(PluginStatus.Error, "Check Spotify API app 'ClientId' / 'ClientSecret' and 'TcpPorts' in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                OnPluginStatusChanged(PluginStatus.Error, "Check Spotify API app 'ClientId' / 'ClientSecret' and 'TcpPorts' in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
             // Check TCP Ports
-            this.tcpPorts = _spotifyConfiguration[TCP_PORTS]
+            tcpPorts = _spotifyConfiguration[TCP_PORTS]
                 .Split(',')
-                .Select(x => new { valid = Int32.TryParse(x.Trim(), out var val), port = val })
+                .Select(x => new { valid = int.TryParse(x.Trim(), out int val), port = val })
                 .Where(x => x.valid)
                 .Select(x => x.port)
                 .ToList();
 
-            if (this.tcpPorts.Count == 0)
+            if (tcpPorts.Count == 0)
             {
-                this.OnPluginStatusChanged(PluginStatus.Error, "Check 'TcpPorts' values in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                OnPluginStatusChanged(PluginStatus.Error, "Check 'TcpPorts' values in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
@@ -128,52 +133,54 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
         private void SpotifyConfiguration()
         {
-            if (!this.ReadConfigurationFile())
+            if (!ReadConfigurationFile())
             {
                 return;
             }
 
             // Is there a token available
             token = null;
-            spotifyTokenFilePath = Path.Combine(this.Plugin.GetPluginDataDirectory(), "spotify.json");
+            spotifyTokenFilePath = Path.Combine(Plugin.GetPluginDataDirectory(), "spotify.json");
+
             if (File.Exists(spotifyTokenFilePath))
             {
-                token = this.ReadTokenFromLocalFile();
+                token = ReadTokenFromLocalFile();
             }
 
             // Check token and the expiration datetime
             if (token != null && DateTime.Now < token.CreateDate.AddSeconds(token.ExpiresIn))
             {
                 // Use the existing token
-                this.Api = new SpotifyWebAPI
+                Api = new SpotifyWebAPI
                 {
                     AccessToken = token.AccessToken,
-                    TokenType = "Bearer",
+                    TokenType = "Bearer"
                 };
-                this.OnPluginStatusChanged(PluginStatus.Normal, "Connected", null);
+
+                OnPluginStatusChanged(PluginStatus.Normal, "Connected", null);
             }
-            else if (!String.IsNullOrEmpty(token?.RefreshToken))
+            else if (!string.IsNullOrEmpty(token?.RefreshToken))
             {
                 // Get a new access token based on the Refresh Token
-                this.RefreshToken(token.RefreshToken);
+                RefreshToken(token.RefreshToken);
             }
             else
             {
                 // User has to login from Loupedeck application Plugin UI: Login - Login to Spotify. See LoginToSpotifyCommand.cs
-                this.OnPluginStatusChanged(PluginStatus.Error, "Login to Spotify as Premium user", null);
+                OnPluginStatusChanged(PluginStatus.Error, "Login to Spotify as Premium user", null);
             }
         }
 
         private Token ReadTokenFromLocalFile()
         {
-            var json = File.ReadAllText(spotifyTokenFilePath);
+            string json = File.ReadAllText(spotifyTokenFilePath);
             var localToken = JsonConvert.DeserializeObject<Token>(json);
 
             // Decrypt refresh token
-            if (!String.IsNullOrEmpty(localToken?.RefreshToken))
+            if (!string.IsNullOrEmpty(localToken?.RefreshToken))
             {
-                var secret = Convert.FromBase64String(localToken.RefreshToken);
-                var plain = ProtectedData.Unprotect(secret, null, DataProtectionScope.CurrentUser);
+                byte[] secret = Convert.FromBase64String(localToken.RefreshToken);
+                byte[] plain = ProtectedData.Unprotect(secret, null, DataProtectionScope.CurrentUser);
                 var encoding = new UTF8Encoding();
                 localToken.RefreshToken = encoding.GetString(plain);
             }
@@ -181,76 +188,77 @@ namespace Loupedeck.Plugins.SpotifyPremium
             return localToken;
         }
 
-        private void SaveTokenToLocalFile(Token newToken, String refreshToken)
+        private void SaveTokenToLocalFile(Token newToken, string refreshToken)
         {
             // Decrypt refresh token
             var encoding = new UTF8Encoding();
-            var plain = encoding.GetBytes(refreshToken);
-            var secret = ProtectedData.Protect(plain, null, DataProtectionScope.CurrentUser);
+            byte[] plain = encoding.GetBytes(refreshToken);
+            byte[] secret = ProtectedData.Protect(plain, null, DataProtectionScope.CurrentUser);
             newToken.RefreshToken = Convert.ToBase64String(secret);
 
             File.WriteAllText(spotifyTokenFilePath, JsonConvert.SerializeObject(newToken));
         }
 
-        private void RefreshToken(String refreshToken)
+        private void RefreshToken(string refreshToken)
         {
-            auth = this.GetAuthorizationCodeAuth(out _);
+            auth = GetAuthorizationCodeAuth(out _);
 
             Token newToken = auth.RefreshToken(refreshToken).Result;
 
-            if (!String.IsNullOrWhiteSpace(newToken.Error))
+            if (!string.IsNullOrWhiteSpace(newToken.Error))
             {
                 Tracer.Error($"Error happened during refreshing Spotify account token: {newToken.Error}: {newToken.ErrorDescription}");
-                this.OnPluginStatusChanged(PluginStatus.Error, "Failed getting access to Spotify. Login as Premium user", null);
+                OnPluginStatusChanged(PluginStatus.Error, "Failed getting access to Spotify. Login as Premium user", null);
             }
 
-            if (this.Api == null)
+            if (Api == null)
             {
-                this.Api = new SpotifyWebAPI
+                Api = new SpotifyWebAPI
                 {
                     AccessToken = newToken.AccessToken,
-                    TokenType = "Bearer",
+                    TokenType = "Bearer"
                 };
             }
 
-            this.OnPluginStatusChanged(PluginStatus.Normal, "Connected", null);
+            OnPluginStatusChanged(PluginStatus.Normal, "Connected", null);
 
-            this.Api.AccessToken = newToken.AccessToken;
-            this.SaveTokenToLocalFile(newToken, refreshToken);
+            Api.AccessToken = newToken.AccessToken;
+            SaveTokenToLocalFile(newToken, refreshToken);
         }
 
         internal void LoginToSpotify()
         {
-            auth = this.GetAuthorizationCodeAuth(out _);
+            auth = GetAuthorizationCodeAuth(out _);
 
-            auth.AuthReceived += this.Auth_AuthReceived;
+            auth.AuthReceived += Auth_AuthReceived;
 
             auth.Start();
             auth.OpenBrowser();
         }
 
-        private async void Auth_AuthReceived(Object sender, AuthorizationCode payload)
+        private async void Auth_AuthReceived(object sender, AuthorizationCode payload)
         {
             try
             {
                 auth.Stop();
 
-                var previousToken = await auth.ExchangeCode(payload.Code);
-                if (!String.IsNullOrWhiteSpace(previousToken.Error))
+                Token previousToken = await auth.ExchangeCode(payload.Code);
+
+                if (!string.IsNullOrWhiteSpace(previousToken.Error))
                 {
                     Tracer.Error($"Error happened during adding Spotify account: {previousToken.Error}: {previousToken.ErrorDescription}");
                     return;
                 }
 
-                this.Api = new SpotifyWebAPI
+                Api = new SpotifyWebAPI
                 {
                     AccessToken = previousToken.AccessToken,
-                    TokenType = previousToken.TokenType,
+                    TokenType = previousToken.TokenType
                 };
 
-                this.OnPluginStatusChanged(PluginStatus.Normal, null, null);
+                OnPluginStatusChanged(PluginStatus.Normal, null, null);
 
-                this.SaveTokenToLocalFile(previousToken, previousToken.RefreshToken);
+                SaveTokenToLocalFile(previousToken, previousToken.RefreshToken);
             }
             catch (Exception ex)
             {
@@ -258,17 +266,17 @@ namespace Loupedeck.Plugins.SpotifyPremium
             }
         }
 
-        private AuthorizationCodeAuth GetAuthorizationCodeAuth(out Int32 timeout)
+        private AuthorizationCodeAuth GetAuthorizationCodeAuth(out int timeout)
         {
             timeout = 240000; // ?!?
 
-            if (!NetworkHelpers.TryGetFreeTcpPort(this.tcpPorts, out var selectedPort))
+            if (!NetworkHelpers.TryGetFreeTcpPort(tcpPorts, out int selectedPort))
             {
                 Tracer.Error("No available ports for Spotify!");
                 return null;
             }
 
-            var scopes =
+            Scope scopes =
                 Scope.PlaylistReadPrivate |
                 Scope.Streaming |
                 Scope.UserReadCurrentlyPlaying |
@@ -283,7 +291,7 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 Scope.PlaylistReadPrivate |
                 Scope.UserReadEmail;
 
-            return !this.ReadConfigurationFile()
+            return !ReadConfigurationFile()
                 ? null
                 : new AuthorizationCodeAuth(
                     _spotifyConfiguration[CLIENT_ID], // Spotify API Client Id
@@ -294,39 +302,39 @@ namespace Loupedeck.Plugins.SpotifyPremium
         }
 
         #endregion Authentication & Configuration
-        
+
         #region Error handling
 
         private void OnPluginStatusChanged(PluginStatus status, string message, string supportUrl)
         {
-            this.Plugin?.OnPluginStatusChanged(status, message, supportUrl);
+            Plugin?.OnPluginStatusChanged(status, message, supportUrl);
         }
 
         private void CheckSpotifyResponse<T>(Func<T, ErrorResponse> apiCall, T param)
         {
-            if (!this.SpotifyApiConnectionOk())
+            if (!SpotifyApiConnectionOk())
             {
                 return;
             }
 
-            var response = apiCall(param);
+            ErrorResponse response = apiCall(param);
 
-            this.CheckStatusCode(response.StatusCode(), response.Error?.Message);
+            CheckStatusCode(response.StatusCode(), response.Error?.Message);
         }
 
         private void CheckSpotifyResponse(Func<ErrorResponse> apiCall)
         {
-            if (!this.SpotifyApiConnectionOk())
+            if (!SpotifyApiConnectionOk())
             {
                 return;
             }
 
-            var response = apiCall();
+            ErrorResponse response = apiCall();
 
-            this.CheckStatusCode(response.StatusCode(), response.Error?.Message);
+            CheckStatusCode(response.StatusCode(), response.Error?.Message);
         }
 
-        private void CheckStatusCode(HttpStatusCode statusCode, String spotifyApiMessage)
+        private void CheckStatusCode(HttpStatusCode statusCode, string spotifyApiMessage)
         {
             switch (statusCode)
             {
@@ -340,27 +348,27 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 case HttpStatusCode.ResetContent:
                 case HttpStatusCode.PartialContent:
 
-                    if (this.Plugin.PluginStatus.Status != PluginStatus.Normal)
+                    if (Plugin.PluginStatus.Status != PluginStatus.Normal)
                     {
-                        this.OnPluginStatusChanged(PluginStatus.Normal, null, null);
+                        OnPluginStatusChanged(PluginStatus.Normal, null, null);
                     }
 
                     break;
 
                 case HttpStatusCode.Unauthorized:
                     // This should never happen?
-                    this.OnPluginStatusChanged(PluginStatus.Error, "Login to Spotify", null);
+                    OnPluginStatusChanged(PluginStatus.Error, "Login to Spotify", null);
                     break;
 
                 case HttpStatusCode.NotFound:
                     // User doesn't have device set or some other Spotify related thing. User action needed.
-                    this.OnPluginStatusChanged(PluginStatus.Warning, $"Spotify message: {spotifyApiMessage}", null);
+                    OnPluginStatusChanged(PluginStatus.Warning, $"Spotify message: {spotifyApiMessage}", null);
                     break;
 
                 default:
-                    if (this.Plugin.PluginStatus.Status != PluginStatus.Error)
+                    if (Plugin.PluginStatus.Status != PluginStatus.Error)
                     {
-                        this.OnPluginStatusChanged(PluginStatus.Error, spotifyApiMessage, null);
+                        OnPluginStatusChanged(PluginStatus.Error, spotifyApiMessage, null);
                     }
 
                     break;
@@ -371,21 +379,23 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
         private PrivateProfile _privateProfile;
 
-        private Paging<SimplePlaylist> GetUserPlaylists(Int32 offset = 0)
+        private Paging<SimplePlaylist> GetUserPlaylists(int offset = 0)
         {
-            if (this.Api != null)
+            if (Api != null)
             {
                 try
                 {
-                    if (this._privateProfile == null)
+                    if (_privateProfile == null)
                     {
-                        this._privateProfile = this.Api.GetPrivateProfile();
+                        _privateProfile = Api.GetPrivateProfile();
                     }
 
-                    var profileId = this._privateProfile?.Id;
-                    if (!String.IsNullOrEmpty(profileId))
+                    string profileId = _privateProfile?.Id;
+
+                    if (!string.IsNullOrEmpty(profileId))
                     {
-                        var playlists = this.Api.GetUserPlaylists(profileId, 50, offset);
+                        Paging<SimplePlaylist> playlists = Api.GetUserPlaylists(profileId, 50, offset);
+
                         if (playlists?.Items?.Any() == true)
                         {
                             return playlists;
@@ -400,19 +410,21 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
             return new Paging<SimplePlaylist>
             {
-                Items = new List<SimplePlaylist>(),
+                Items = new List<SimplePlaylist>()
             };
         }
 
         internal List<SimplePlaylist> GetAllPlaylists()
         {
-            Paging<SimplePlaylist> playlists = this.GetUserPlaylists();
+            Paging<SimplePlaylist> playlists = GetUserPlaylists();
+
             if (playlists != null)
             {
-                var totalPlaylistsCount = playlists.Total;
+                int totalPlaylistsCount = playlists.Total;
+
                 while (playlists.Items.Count < totalPlaylistsCount)
                 {
-                    playlists.Items.AddRange(this.GetUserPlaylists(playlists.Items.Count).Items);
+                    playlists.Items.AddRange(GetUserPlaylists(playlists.Items.Count).Items);
                 }
 
                 return playlists.Items;
@@ -421,22 +433,32 @@ namespace Loupedeck.Plugins.SpotifyPremium
             return null;
         }
 
-        internal void SkipPlaybackToNext() => this.CheckSpotifyResponse(this.Api.SkipPlaybackToNext, this.CurrentDeviceId);
+        internal void SkipPlaybackToNext()
+        {
+            CheckSpotifyResponse(Api.SkipPlaybackToNext, CurrentDeviceId);
+        }
 
-        internal void SkipPlaybackToPrevious() => this.CheckSpotifyResponse(this.Api.SkipPlaybackToPrevious, this.CurrentDeviceId);
+        internal void SkipPlaybackToPrevious()
+        {
+            CheckSpotifyResponse(Api.SkipPlaybackToPrevious, CurrentDeviceId);
+        }
 
         internal bool TogglePlayback()
         {
-            var playback = this.Api.GetPlayback();
+            PlaybackContext playback = Api.GetPlayback();
 
             if (playback.IsPlaying)
             {
-                this.CheckSpotifyResponse(this.Api.PausePlayback, this.CurrentDeviceId);
+                CheckSpotifyResponse(Api.PausePlayback, CurrentDeviceId);
             }
             else
             {
-                ErrorResponse Func() => this.Api.ResumePlayback(this.CurrentDeviceId, String.Empty, null, String.Empty);
-                this.CheckSpotifyResponse(Func);
+                ErrorResponse Func()
+                {
+                    return Api.ResumePlayback(CurrentDeviceId, string.Empty, null, string.Empty);
+                }
+
+                CheckSpotifyResponse(Func);
             }
 
             return !playback.IsPlaying; // presume we switched it at this point.
@@ -448,17 +470,17 @@ namespace Loupedeck.Plugins.SpotifyPremium
         /// This is our most recently known Volume. Used when muting to remember the previous volume.  Used for dials when
         /// incrementing rapidly.
         /// </summary>
-        private Int32 PreviousVolume { get; set; }
+        private int PreviousVolume { get; set; }
 
-        internal void SetVolume(String volumeString)
+        internal void SetVolume(string volumeString)
         {
-            if (int.TryParse(volumeString, out var volume))
+            if (int.TryParse(volumeString, out int volume))
             {
-                this.SetVolume(volume);
+                SetVolume(volume);
             }
         }
 
-        private void SetVolume(Int32 percents)
+        private void SetVolume(int percents)
         {
             if (percents > 100)
             {
@@ -470,12 +492,16 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 percents = 0;
             }
 
-            this.InitVolumeBlockedTimer();
+            InitVolumeBlockedTimer();
 
-            this.PreviousVolume = percents;
+            PreviousVolume = percents;
 
-            ErrorResponse Func() => this.Api.SetVolume(percents, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.SetVolume(percents, CurrentDeviceId);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
         private bool volumeCallsBlocked;
@@ -490,66 +516,77 @@ namespace Loupedeck.Plugins.SpotifyPremium
             // volume changes round trip to the api, we don't want to Get the current Volume from Spotify if we've very recently set it
             // a few times.  Thus, we have a 2 second buffer after the last volume set, before we try to get the actual current volume 
             // from Spotify.
-            if (this.volumeCallsBlocked)
+            if (volumeCallsBlocked)
             {
-                modifiedVolume = this.PreviousVolume + ticks;
+                modifiedVolume = PreviousVolume + ticks;
             }
             else
             {
-                var playback = this.Api.GetPlayback();
+                PlaybackContext playback = Api.GetPlayback();
+
                 if (playback?.Device == null)
                 {
                     // Set plugin status and message
-                    this.CheckStatusCode(HttpStatusCode.NotFound, "Cannot adjust volume, no device");
+                    CheckStatusCode(HttpStatusCode.NotFound, "Cannot adjust volume, no device");
                     return;
                 }
-                else
-                {
-                    modifiedVolume = playback.Device.VolumePercent + ticks;
-                }
+
+                modifiedVolume = playback.Device.VolumePercent + ticks;
             }
 
-            this.SetVolume(modifiedVolume);
+            SetVolume(modifiedVolume);
         }
 
         private void InitVolumeBlockedTimer()
         {
-            if (this.volumeBlockedTimer == null)
+            if (volumeBlockedTimer == null)
             {
-                this.volumeBlockedTimer = new Timer(2000);
-                this.volumeBlockedTimer.Elapsed += this.VolumeBlockExpired;
+                volumeBlockedTimer = new Timer(2000);
+                volumeBlockedTimer.Elapsed += VolumeBlockExpired;
             }
 
-            this.volumeCallsBlocked = true;
-            if (this.volumeBlockedTimer.Enabled)
+            volumeCallsBlocked = true;
+
+            if (volumeBlockedTimer.Enabled)
             {
-                this.volumeBlockedTimer.Stop();
+                volumeBlockedTimer.Stop();
             }
 
-            this.volumeBlockedTimer.Start();
+            volumeBlockedTimer.Start();
         }
 
-        private void VolumeBlockExpired(Object o, ElapsedEventArgs e) => this.volumeCallsBlocked = false;
+        private void VolumeBlockExpired(object o, ElapsedEventArgs e)
+        {
+            volumeCallsBlocked = false;
+        }
 
         internal void Mute()
         {
-            var playback = this.Api.GetPlayback();
+            PlaybackContext playback = Api.GetPlayback();
 
             if (playback?.Device?.VolumePercent > 0)
             {
-                this.PreviousVolume = playback.Device.VolumePercent;
+                PreviousVolume = playback.Device.VolumePercent;
             }
 
-            ErrorResponse Func() => this.Api.SetVolume(0, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.SetVolume(0, CurrentDeviceId);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
         internal void Unmute()
         {
-            var unmuteVolume = this.PreviousVolume != 0 ? this.PreviousVolume : 50;
+            int unmuteVolume = PreviousVolume != 0 ? PreviousVolume : 50;
 
-            ErrorResponse Func() => this.Api.SetVolume(unmuteVolume, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.SetVolume(unmuteVolume, CurrentDeviceId);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
         /// <summary>
@@ -558,85 +595,95 @@ namespace Loupedeck.Plugins.SpotifyPremium
         /// <returns>true if muted after this call</returns>
         internal bool ToggleMute()
         {
-            var playback = this.Api.GetPlayback();
+            PlaybackContext playback = Api.GetPlayback();
 
             if (playback?.Device.VolumePercent != 0)
             {
-                this.Mute();
+                Mute();
                 return true;
             }
-            else
-            {
-                this.Unmute();
-                return false;
-            }
+
+            Unmute();
+            return false;
         }
 
         #endregion Volume
 
         internal bool ShufflePlay()
         {
-            var playback = this.Api.GetPlayback();
+            PlaybackContext playback = Api.GetPlayback();
             bool shuffleState = !playback.ShuffleState;
 
-            ErrorResponse Func() => this.Api.SetShuffle(shuffleState, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.SetShuffle(shuffleState, CurrentDeviceId);
+            }
+
+            CheckSpotifyResponse(Func);
 
             return shuffleState;
         }
 
-        internal void StartPlaylist(String contextUri)
+        internal void StartPlaylist(string contextUri)
         {
-            ErrorResponse Func() => this.Api.ResumePlayback(this.CurrentDeviceId, contextUri, null, String.Empty);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.ResumePlayback(CurrentDeviceId, contextUri, null, string.Empty);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
-        internal void SaveToPlaylist(String playlistId)
+        internal void SaveToPlaylist(string playlistId)
         {
-            playlistId = playlistId.Replace("spotify:playlist:", String.Empty);
+            playlistId = playlistId.Replace("spotify:playlist:", string.Empty);
 
-            var playback = this.Api.GetPlayback();
-            var currentTrackUri = playback.Item.Uri;
+            PlaybackContext playback = Api.GetPlayback();
+            string currentTrackUri = playback.Item.Uri;
 
-            ErrorResponse Func() => this.Api.AddPlaylistTrack(playlistId, currentTrackUri);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.AddPlaylistTrack(playlistId, currentTrackUri);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
         internal bool ToggleLiked()
         {
-            var playback = this.Api.GetPlayback();
-            var trackId = playback.Item?.Id;
-            if (String.IsNullOrEmpty(trackId))
+            PlaybackContext playback = Api.GetPlayback();
+            string trackId = playback.Item?.Id;
+
+            if (string.IsNullOrEmpty(trackId))
             {
                 // Set plugin status and message
-                this.CheckStatusCode(HttpStatusCode.NotFound, "No track");
+                CheckStatusCode(HttpStatusCode.NotFound, "No track");
                 return false;
             }
 
-            var trackItemId = new List<String> { trackId };
-            var tracksExist = this.Api.CheckSavedTracks(trackItemId);
+            var trackItemId = new List<string> { trackId };
+            ListResponse<bool> tracksExist = Api.CheckSavedTracks(trackItemId);
+
             if (tracksExist.List == null || tracksExist.Error != null)
             {
                 // Set plugin status and message
-                this.CheckStatusCode(HttpStatusCode.NotFound, "No track list");
+                CheckStatusCode(HttpStatusCode.NotFound, "No track list");
                 return false;
             }
 
             if (tracksExist.List.Any() && tracksExist.List.FirstOrDefault() == false)
             {
-                this.CheckSpotifyResponse(this.Api.SaveTrack, trackId);
+                CheckSpotifyResponse(Api.SaveTrack, trackId);
                 return true;
             }
-            else
-            {
-                this.CheckSpotifyResponse(this.Api.RemoveSavedTracks, trackItemId);
-                return false;
-            }
+
+            CheckSpotifyResponse(Api.RemoveSavedTracks, trackItemId);
+            return false;
         }
 
         internal List<Device> GetDevices()
         {
-            var devices = this.Api?.GetDevices()?.Devices;
+            List<Device> devices = Api?.GetDevices()?.Devices;
 
             if (devices?.Any() == true)
             {
@@ -648,25 +695,29 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
         private const string ACTIVE_DEVICE = "activedevice";
 
-        internal void TransferPlayback(String commandParameter)
+        internal void TransferPlayback(string commandParameter)
         {
             if (commandParameter == ACTIVE_DEVICE)
             {
-                commandParameter = String.Empty;
+                commandParameter = string.Empty;
             }
 
-            this.CurrentDeviceId = commandParameter;
+            CurrentDeviceId = commandParameter;
 
-            ErrorResponse Func() => this.Api.TransferPlayback(this.CurrentDeviceId, true);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.TransferPlayback(CurrentDeviceId, true);
+            }
+
+            CheckSpotifyResponse(Func);
         }
 
         internal RepeatState ChangeRepeatState()
         {
-            var playback = this.Api.GetPlayback();
+            PlaybackContext playback = Api.GetPlayback();
 
-            RepeatState newRepeatState = RepeatState.Off;
-            
+            var newRepeatState = RepeatState.Off;
+
             switch (playback.RepeatState)
             {
                 case RepeatState.Off:
@@ -683,12 +734,16 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
                 default:
                     // Set plugin status and message
-                    this.CheckStatusCode(HttpStatusCode.NotFound, "Not able to change repeat state (check device etc.)");
+                    CheckStatusCode(HttpStatusCode.NotFound, "Not able to change repeat state (check device etc.)");
                     break;
             }
 
-            ErrorResponse Func() => this.Api.SetRepeatMode(newRepeatState, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            ErrorResponse Func()
+            {
+                return Api.SetRepeatMode(newRepeatState, CurrentDeviceId);
+            }
+
+            CheckSpotifyResponse(Func);
 
             return newRepeatState;
         }
@@ -697,7 +752,7 @@ namespace Loupedeck.Plugins.SpotifyPremium
         {
             // this.Plugin?.Dispose();  // we don't own this..
 
-            this.Api?.Dispose();
+            Api?.Dispose();
         }
     }
 }

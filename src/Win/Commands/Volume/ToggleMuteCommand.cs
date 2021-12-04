@@ -2,22 +2,19 @@
 
 namespace Loupedeck.Plugins.SpotifyPremium.Commands.Volume
 {
-    using System;
-
     internal class ToggleMuteCommand : SpotifyCommand
     {
-        private Boolean currentlyMuted;
+        private bool currentlyMuted;
 
         public ToggleMuteCommand() : base("Toggle Mute", "Toggles audio mute state", "Spotify Volume") { }
 
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            this.currentlyMuted = this.Wrapper.ToggleMute();
+            currentlyMuted = Wrapper.ToggleMute();
 
-            this.ActionImageChanged();
+            ActionImageChanged();
         }
 
-        protected override string IconResource => this.currentlyMuted ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
-
+        protected override string IconResource => currentlyMuted ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
     }
 }

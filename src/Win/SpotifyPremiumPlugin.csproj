@@ -10,6 +10,8 @@
     <AssemblyName>SpotifyPremiumPlugin</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFramework>net472</TargetFramework>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>5.0</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

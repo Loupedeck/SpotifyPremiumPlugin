@@ -2,10 +2,6 @@
 
 namespace Loupedeck.Plugins.SpotifyPremium.Adjustments.Playback
 {
-    using System;
-
-    using Adjustments;
-
     internal class PlayAndNavigateAdjustment : SpotifyAdjustment
     {
         public PlayAndNavigateAdjustment()
@@ -15,28 +11,28 @@ namespace Loupedeck.Plugins.SpotifyPremium.Adjustments.Playback
                 "Playback",
                 true) { }
 
-        protected override void ApplyAdjustment(String actionParameter, Int32 ticks)
+        protected override void ApplyAdjustment(string actionParameter, int ticks)
         {
             if (ticks > 0)
             {
-                this.Wrapper.SkipPlaybackToNext();
+                Wrapper.SkipPlaybackToNext();
             }
             else
             {
-                this.Wrapper.SkipPlaybackToPrevious();
+                Wrapper.SkipPlaybackToPrevious();
             }
         }
 
         // Overwrite the RunCommand method that is called every time the user presses the encoder to which this command is assigned
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            this.Wrapper.TogglePlayback();
+            Wrapper.TogglePlayback();
         }
 
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
+        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
         {
             // Dial strip 50px
-            var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width50.PlayAndNavigateTracks.png");
+            BitmapImage bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width50.PlayAndNavigateTracks.png");
             return bitmapImage;
         }
     }

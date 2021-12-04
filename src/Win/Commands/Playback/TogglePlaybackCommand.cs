@@ -2,21 +2,19 @@
 
 namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-
     internal class TogglePlaybackCommand : SpotifyCommand
     {
-        private Boolean _isPlaying = true;
+        private bool isPlaying = true;
 
         public TogglePlaybackCommand() : base("Toggle Playback", "Toggles audio playback", "Playback") { }
 
-        protected override void RunCommand(String actionParameter)
+        protected override void RunCommand(string actionParameter)
         {
-            this._isPlaying = this.Wrapper.TogglePlayback();
+            isPlaying = Wrapper.TogglePlayback();
 
-            this.ActionImageChanged();
+            ActionImageChanged();
         }
 
-        protected override string IconResource => this._isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
+        protected override string IconResource => isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
     }
 }

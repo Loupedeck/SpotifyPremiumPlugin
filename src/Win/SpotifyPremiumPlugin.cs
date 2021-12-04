@@ -1,53 +1,55 @@
 // Copyright (c) Loupedeck. All rights reserved.
 
+#region Usings
+
+using System;
+using System.IO;
+
+#endregion
+
 namespace Loupedeck.Plugins.SpotifyPremium
 {
-    using System;
-    using System.IO;
-
-    using Loupedeck;
-
     /// <summary>
     /// Plugin main class - Loupedeck device commands and adjustment
     /// </summary>
     internal class SpotifyPremiumPlugin : Plugin
     {
         // This plugin has Spotify API -only actions.
-        public override Boolean UsesApplicationApiOnly => true;
+        public override bool UsesApplicationApiOnly => true;
 
         // This plugin does not require an application (i.e. Spotify application installed on pc).
-        public override Boolean HasNoApplication => true;
+        public override bool HasNoApplication => true;
 
         private SpotifyWrapper wrapper;
 
-        internal SpotifyWrapper Wrapper => this.wrapper ?? (this.wrapper = new SpotifyWrapper(this));
+        internal SpotifyWrapper Wrapper => wrapper ?? (wrapper = new SpotifyWrapper(this));
 
         public override void Load()
         {
-            this.LoadPluginIcons();
+            LoadPluginIcons();
         }
 
         public override void Unload() { }
 
-        public override void RunCommand(String commandName, String parameter) { }
+        public override void RunCommand(string commandName, string parameter) { }
 
-        public override void ApplyAdjustment(String adjustmentName, String parameter, Int32 diff) { }
+        public override void ApplyAdjustment(string adjustmentName, string parameter, int diff) { }
 
         private void LoadPluginIcons()
         {
             // Icons for Loupedeck application UI
-            this.Info.Icon16x16 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon16x16.png");
-            this.Info.Icon32x32 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon32x32.png");
-            this.Info.Icon48x48 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon48x48.png");
-            this.Info.Icon256x256 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon256x256.png");
+            Info.Icon16x16 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon16x16.png");
+            Info.Icon32x32 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon32x32.png");
+            Info.Icon48x48 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon48x48.png");
+            Info.Icon256x256 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon256x256.png");
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                this.wrapper?.Dispose();
-                this.wrapper = null;
+                wrapper?.Dispose();
+                wrapper = null;
             }
 
             base.Dispose(disposing);
@@ -55,13 +57,13 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
         #region Installer
 
-        internal String ClientConfigurationFilePath => Path.Combine(this.GetPluginDataDirectory(), "spotify-client.txt");
+        internal string ClientConfigurationFilePath => Path.Combine(GetPluginDataDirectory(), "spotify-client.txt");
 
-        public override Boolean Install()
+        public override bool Install()
         {
             // Here we ensure the plugin data directory is there.
             // See Storing-Plugin-Data
-            var pluginDataDirectory = this.GetPluginDataDirectory();
+            string pluginDataDirectory = GetPluginDataDirectory();
 
             if (!IoHelpers.EnsureDirectoryExists(pluginDataDirectory))
             {
@@ -70,12 +72,12 @@ namespace Loupedeck.Plugins.SpotifyPremium
             }
 
             // Now we put a template configuration file from resources
-            var filePath = Path.Combine(pluginDataDirectory, this.ClientConfigurationFilePath);
+            string filePath = Path.Combine(pluginDataDirectory, ClientConfigurationFilePath);
 
             using (new StreamWriter(filePath))
             {
                 // Write data
-                this.Assembly.ExtractFile("spotify-client-template.txt", this.ClientConfigurationFilePath);
+                Assembly.ExtractFile("spotify-client-template.txt", ClientConfigurationFilePath);
             }
 
             return true;
@@ -85,15 +87,18 @@ namespace Loupedeck.Plugins.SpotifyPremium
 
         #region DevicesSelector
 
-        private readonly String _deviceCacheFileName = "CachedDevice.txt";
+        private readonly string _deviceCacheFileName = "CachedDevice.txt";
 
-        private readonly Object _locker = new Object();
+        private readonly object _locker = new object();
 
-        private String GetCacheFilePath(String fileName) => Path.Combine(this.GetPluginDataDirectory(), "Cache", fileName);
-
-        internal void SaveDeviceToCache(String deviceId)
+        private string GetCacheFilePath(string fileName)
         {
-            var cacheDirectory = Path.Combine(this.GetPluginDataDirectory(), "Cache");
+            return Path.Combine(GetPluginDataDirectory(), "Cache", fileName);
+        }
+
+        internal void SaveDeviceToCache(string deviceId)
+        {
+            string cacheDirectory = Path.Combine(GetPluginDataDirectory(), "Cache");
 
             if (!Directory.Exists(cacheDirectory))
             {
@@ -107,22 +112,22 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 }
             }
 
-            var cacheFilePath = this.GetCacheFilePath(this._deviceCacheFileName);
+            string cacheFilePath = GetCacheFilePath(_deviceCacheFileName);
 
-            lock (this._locker)
+            lock (_locker)
             {
                 File.WriteAllText(cacheFilePath, deviceId);
             }
         }
 
-        internal String GetCachedDeviceID()
+        internal string GetCachedDeviceID()
         {
             try
             {
-                var cacheFilePath = this.GetCacheFilePath(this._deviceCacheFileName);
-                var cachedActions = File.ReadAllText(cacheFilePath);
+                string cacheFilePath = GetCacheFilePath(_deviceCacheFileName);
+                string cachedActions = File.ReadAllText(cacheFilePath);
 
-                if (!String.IsNullOrEmpty(cachedActions))
+                if (!string.IsNullOrEmpty(cachedActions))
                 {
                     return cachedActions;
                 }
@@ -132,7 +137,7 @@ namespace Loupedeck.Plugins.SpotifyPremium
                 Tracer.Warning(ex, "Spotify: error during reading cached deviceID");
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         #endregion DevicesSelector
