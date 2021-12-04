@@ -19,18 +19,18 @@ namespace Loupedeck.SpotifyPremiumPlugin.Adjustments.Playback
         {
             if (ticks > 0)
             {
-                Wrapper.SkipPlaybackToNext();
+                this.Wrapper.SkipPlaybackToNext();
             }
             else
             {
-                Wrapper.SkipPlaybackToPrevious();
+                this.Wrapper.SkipPlaybackToPrevious();
             }
         }
 
         // Overwrite the RunCommand method that is called every time the user presses the encoder to which this command is assigned
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.TogglePlayback();
+            this.Wrapper.TogglePlayback();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)

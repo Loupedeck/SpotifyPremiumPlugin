@@ -10,28 +10,18 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
     internal class ChangeRepeatStateCommand : SpotifyCommand
     {
-        private RepeatState _state;
-
-        public RepeatState State
-        {
-            get => this._state;
-            private set
-            {
-                this._state = value;
-                this.ActionImageChanged();
-            }
-        }
+        private RepeatState State { get; set; }
 
         public ChangeRepeatStateCommand()
             : base("Change Repeat State", "Change Repeat State description", "Playback")
         {
         }
 
-        public override string IconResource
+        protected override string IconResource
         {
             get
             {
-                switch (State)
+                switch (this.State)
                 {
                     case RepeatState.Off:
                         return "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
@@ -51,7 +41,8 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            this.State = Wrapper.ChangeRepeatState();
+            this.State = this.Wrapper.ChangeRepeatState();
+            this.ActionImageChanged();
         }
     }
 }

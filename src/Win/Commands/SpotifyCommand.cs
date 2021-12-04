@@ -1,22 +1,18 @@
-﻿#region Header
-
-// Copyright © Anker Technology, BV 2021
-
-#endregion
+﻿
 namespace Loupedeck.SpotifyPremiumPlugin.Commands
 {
     internal abstract class SpotifyCommand : PluginDynamicCommand
     {
-        protected SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-        protected SpotifyWrapper Wrapper => SpotifyPremiumPlugin.Wrapper;
+        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
+        protected SpotifyWrapper Wrapper => this.SpotifyPremiumPlugin.Wrapper;
 
-        protected SpotifyCommand(string displayName, string description, string groupName, DeviceType supportedDevices = DeviceType.All)
+        protected SpotifyCommand(string displayName, string description, string groupName)
             : base(displayName, description, groupName) { }
 
         protected SpotifyCommand() { }
 
-        public virtual string IconResource { get; }
+        protected virtual string IconResource { get; } = string.Empty;
 
-        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize) => EmbeddedResources.ReadImage(IconResource);
+        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize) => EmbeddedResources.ReadImage(this.IconResource);
     }
 }

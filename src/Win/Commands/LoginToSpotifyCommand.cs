@@ -8,6 +8,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands
     {
         public LoginToSpotifyCommand() : base("Login to Spotify", "Premium user login to Spotify API", "Login") { }
 
-        protected override void RunCommand(String actionParameter) => Wrapper.LoginToSpotify();
+        protected override void RunCommand(String actionParameter) => this.Wrapper.LoginToSpotify();
     }
 }

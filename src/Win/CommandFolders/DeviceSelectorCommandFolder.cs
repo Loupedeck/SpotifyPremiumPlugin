@@ -16,7 +16,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
         private List<Device> _devices;
 
         private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-        protected SpotifyWrapper Wrapper => SpotifyPremiumPlugin.Wrapper;
+        private SpotifyWrapper Wrapper => this.SpotifyPremiumPlugin.Wrapper;
 
         public DeviceSelectorCommandFolder()
         {
@@ -33,7 +33,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override IEnumerable<String> GetButtonPressActionNames()
         {
-            _devices = Wrapper.GetDevices();
+            this._devices = this.Wrapper.GetDevices();
 
             return this._devices?.Any() == true ? this._devices.Select(x => this.CreateCommandName(x.Id)) : new List<String>();
         }
@@ -52,7 +52,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override void RunCommand(String commandParameter)
         {
-            Wrapper.TransferPlayback(commandParameter);
+            this.Wrapper.TransferPlayback(commandParameter);
         }
     }
 }

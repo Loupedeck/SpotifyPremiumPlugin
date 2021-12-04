@@ -9,7 +9,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
     internal class DirectVolumeCommand : SpotifyCommand
     {
         public DirectVolumeCommand()
-            : base()
         {
             // Profile actions do not belong to a group in the current UI, they are on the top level
             this.DisplayName = "Direct Volume"; // so this will be shown as "group name" for parameterized commands
@@ -20,7 +19,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.SetVolume(actionParameter);
+            this.Wrapper.SetVolume(actionParameter);
         }
     }
 }

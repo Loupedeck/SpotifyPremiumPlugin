@@ -12,12 +12,12 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 
         protected override void RunCommand(String actionParameter)
         {
-            this.currentlyMuted = Wrapper.ToggleMute();
+            this.currentlyMuted = this.Wrapper.ToggleMute();
 
             this.ActionImageChanged();
         }
 
-        public override string IconResource => this.currentlyMuted ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
+        protected override string IconResource => this.currentlyMuted ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
 
     }
 }

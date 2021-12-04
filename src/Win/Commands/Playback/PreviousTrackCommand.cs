@@ -15,9 +15,9 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.SkipPlaybackToPrevious();
+            this.Wrapper.SkipPlaybackToPrevious();
         }
 
-        public override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png";
+        protected override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png";
    }
 }

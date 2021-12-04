@@ -3,12 +3,14 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+    using System.IO;
+
     using Loupedeck;
 
     /// <summary>
     /// Plugin main class - Loupedeck device commands and adjustment
     /// </summary>
-    public partial class SpotifyPremiumPlugin : Plugin
+    internal class SpotifyPremiumPlugin : Plugin
     {
         // This plugin has Spotify API -only actions.
         public override Boolean UsesApplicationApiOnly => true;
@@ -18,24 +20,18 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
         private SpotifyWrapper wrapper;
 
-        public SpotifyWrapper Wrapper => this.wrapper ?? (this.wrapper = new SpotifyWrapper(this));
+        internal SpotifyWrapper Wrapper => this.wrapper ?? (this.wrapper = new SpotifyWrapper(this));
 
         public override void Load()
         {
             this.LoadPluginIcons();
         }
 
-        public override void Unload()
-        {
-        }
+        public override void Unload() { }
 
-        public override void RunCommand(String commandName, String parameter)
-        {
-        }
+        public override void RunCommand(String commandName, String parameter) { }
 
-        public override void ApplyAdjustment(String adjustmentName, String parameter, Int32 diff)
-        {
-        }
+        public override void ApplyAdjustment(String adjustmentName, String parameter, Int32 diff) { }
 
         private void LoadPluginIcons()
         {
@@ -56,5 +52,89 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
             base.Dispose(disposing);
         }
+
+        #region Installer
+
+        internal String ClientConfigurationFilePath => Path.Combine(this.GetPluginDataDirectory(), "spotify-client.txt");
+
+        public override Boolean Install()
+        {
+            // Here we ensure the plugin data directory is there.
+            // See Storing-Plugin-Data
+            var pluginDataDirectory = this.GetPluginDataDirectory();
+
+            if (!IoHelpers.EnsureDirectoryExists(pluginDataDirectory))
+            {
+                Tracer.Error("Plugin data is not created. Cannot continue installation");
+                return false;
+            }
+
+            // Now we put a template configuration file from resources
+            var filePath = Path.Combine(pluginDataDirectory, this.ClientConfigurationFilePath);
+
+            using (new StreamWriter(filePath))
+            {
+                // Write data
+                this.Assembly.ExtractFile("spotify-client-template.txt", this.ClientConfigurationFilePath);
+            }
+
+            return true;
+        }
+
+        #endregion Installer
+
+        #region DevicesSelector
+
+        private readonly String _deviceCacheFileName = "CachedDevice.txt";
+
+        private readonly Object _locker = new Object();
+
+        private String GetCacheFilePath(String fileName) => Path.Combine(this.GetPluginDataDirectory(), "Cache", fileName);
+
+        internal void SaveDeviceToCache(String deviceId)
+        {
+            var cacheDirectory = Path.Combine(this.GetPluginDataDirectory(), "Cache");
+
+            if (!Directory.Exists(cacheDirectory))
+            {
+                try
+                {
+                    Directory.CreateDirectory(cacheDirectory);
+                }
+                catch (Exception ex)
+                {
+                    Tracer.Warning("Cannot create cache directory", ex);
+                }
+            }
+
+            var cacheFilePath = this.GetCacheFilePath(this._deviceCacheFileName);
+
+            lock (this._locker)
+            {
+                File.WriteAllText(cacheFilePath, deviceId);
+            }
+        }
+
+        internal String GetCachedDeviceID()
+        {
+            try
+            {
+                var cacheFilePath = this.GetCacheFilePath(this._deviceCacheFileName);
+                var cachedActions = File.ReadAllText(cacheFilePath);
+
+                if (!String.IsNullOrEmpty(cachedActions))
+                {
+                    return cachedActions;
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning(ex, "Spotify: error during reading cached deviceID");
+            }
+
+            return String.Empty;
+        }
+
+        #endregion DevicesSelector
     }
 }

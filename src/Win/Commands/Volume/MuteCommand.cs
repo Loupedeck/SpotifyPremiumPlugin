@@ -10,9 +10,9 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.Mute();
+            this.Wrapper.Mute();
         }
 
-        public override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png";
+        protected override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.MuteVolume.png";
     }
 }

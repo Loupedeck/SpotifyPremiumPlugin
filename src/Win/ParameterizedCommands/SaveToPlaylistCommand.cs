@@ -9,7 +9,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
     internal class SaveToPlaylistCommand : SpotifyCommand
     {
-        public SaveToPlaylistCommand() : base()
+        public SaveToPlaylistCommand()
         {
             // Profile actions do not belong to a group in the current UI, they are on the top level
             this.DisplayName = "Save To Playlist"; // so this will be shown as "group name" for parameterized commands
@@ -20,12 +20,12 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.SaveToPlaylist(actionParameter);
+            this.Wrapper.SaveToPlaylist(actionParameter);
         }
 
         protected override PluginActionParameter[] GetParameters()
         {
-            var playlists = Wrapper.GetAllPlaylists();
+            var playlists = this.Wrapper.GetAllPlaylists();
             return playlists?.Select(x => new PluginActionParameter(x.Uri, x.Name, String.Empty))
                         .ToArray();
         }

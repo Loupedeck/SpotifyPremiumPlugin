@@ -9,7 +9,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
     internal class StartPlaylistCommand : SpotifyCommand
     {
-        public StartPlaylistCommand() : base()
+        public StartPlaylistCommand()
         {
             // Profile actions do not belong to a group in the current UI, they are on the top level
             this.DisplayName = "Start Playlist"; // so this will be shown as "group name" for parameterized commands
@@ -20,12 +20,12 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.StartPlaylist(actionParameter);
+            this.Wrapper.StartPlaylist(actionParameter);
         }
 
         protected override PluginActionParameter[] GetParameters()
         {
-            var playlists = Wrapper.GetAllPlaylists();
+            var playlists = this.Wrapper.GetAllPlaylists();
             return playlists?.Select(x => new PluginActionParameter(x.Uri, x.Name, String.Empty))
                         .ToArray();
         }

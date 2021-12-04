@@ -19,13 +19,13 @@ namespace Loupedeck.SpotifyPremiumPlugin.Adjustments.Volume
 
         protected override void ApplyAdjustment(String actionParameter, Int32 ticks)
         {
-            Wrapper.AdjustVolume(ticks);
+            this.Wrapper.AdjustVolume(ticks);
         }
 
         // Overwrite the RunCommand method that is called every time the user presses the encoder to which this command is assigned
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.TogglePlayback();
+            this.Wrapper.TogglePlayback();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)

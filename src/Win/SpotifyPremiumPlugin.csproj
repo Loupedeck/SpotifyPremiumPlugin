@@ -77,10 +77,6 @@
     <Compile Include="ParameterizedCommands\SaveToPlaylistCommand.cs" />
     <Compile Include="ParameterizedCommands\DirectVolumeCommand.cs" />
     <Compile Include="ParameterizedCommands\StartPlaylistCommand.cs" />
-    <Compile Include="SpotifyPremiumPlugin.ApiResponse.cs" />
-    <Compile Include="SpotifyPremiumPlugin.Api.cs" />
-    <Compile Include="SpotifyPremiumPlugin.DevicesSelector.cs" />
-    <Compile Include="SpotifyPremiumPlugin.Installer.cs" />
     <Compile Include="Commands\LoginToSpotifyCommand.cs" />
     <Compile Include="Commands\Playback\TogglePlaybackCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

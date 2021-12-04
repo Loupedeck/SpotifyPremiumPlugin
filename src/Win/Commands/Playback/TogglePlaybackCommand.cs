@@ -14,11 +14,11 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            this._isPlaying = Wrapper.TogglePlayback();
+            this._isPlaying = this.Wrapper.TogglePlayback();
 
             this.ActionImageChanged();
         }
 
-        public override string IconResource => this._isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
+        protected override string IconResource => this._isPlaying ? "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Play.png" : "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Pause.png";
     }
 }

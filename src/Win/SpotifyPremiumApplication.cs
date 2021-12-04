@@ -9,10 +9,6 @@ namespace Loupedeck.SpotifyPremiumPlugin
     /// </summary>
     public class SpotifyPremiumApplication : ClientApplication
     {
-        public SpotifyPremiumApplication()
-        {
-        }
-
         protected override String GetProcessName() => "Spotify";
 
         protected override String GetBundleName() => "com.spotify.client";

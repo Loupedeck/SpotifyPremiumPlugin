@@ -12,11 +12,11 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands
 
         protected override void RunCommand(String actionParameter)
         {
-            this._isLiked = Wrapper.ToggleLiked();
+            this._isLiked = this.Wrapper.ToggleLiked();
             this.ActionImageChanged();
         }
 
-        public override string IconResource => this._isLiked ? 
+        protected override string IconResource => this._isLiked ? 
             "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.SongLike.png" : 
             "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.SongDislike.png";
     }

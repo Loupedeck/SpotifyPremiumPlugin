@@ -10,9 +10,9 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 
         protected override void RunCommand(String actionParameter)
         {
-            Wrapper.Unmute();
+            this.Wrapper.Unmute();
         }
 
-        public override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
+        protected override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png";
     }
 }
