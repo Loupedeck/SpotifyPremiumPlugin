@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Loupedeck. All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
+namespace Loupedeck.Plugins.SpotifyPremium.CommandFolders
 {
     using System;
     using System.Collections.Generic;

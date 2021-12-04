@@ -1,4 +1,4 @@
-﻿namespace Loupedeck.SpotifyPremiumPlugin.Adjustments
+﻿namespace Loupedeck.Plugins.SpotifyPremium.Adjustments
 {
     internal abstract class SpotifyAdjustment : PluginDynamicAdjustment
     {

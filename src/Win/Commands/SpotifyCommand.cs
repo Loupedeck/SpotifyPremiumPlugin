@@ -1,5 +1,5 @@
 ﻿
-namespace Loupedeck.SpotifyPremiumPlugin.Commands
+namespace Loupedeck.Plugins.SpotifyPremium.Commands
 {
     internal abstract class SpotifyCommand : PluginDynamicCommand
     {

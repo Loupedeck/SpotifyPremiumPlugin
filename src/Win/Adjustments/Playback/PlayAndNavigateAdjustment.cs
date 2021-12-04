@@ -1,6 +1,6 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.Adjustments.Playback
+namespace Loupedeck.Plugins.SpotifyPremium.Adjustments.Playback
 {
     using System;
 

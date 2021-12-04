@@ -1,6 +1,6 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.Adjustments.Volume
+namespace Loupedeck.Plugins.SpotifyPremium.Adjustments.Volume
 {
     using System;
 

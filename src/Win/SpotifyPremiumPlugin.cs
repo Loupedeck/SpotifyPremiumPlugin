@@ -1,6 +1,6 @@
 // Copyright (c) Loupedeck. All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.Plugins.SpotifyPremium
 {
     using System;
     using System.IO;

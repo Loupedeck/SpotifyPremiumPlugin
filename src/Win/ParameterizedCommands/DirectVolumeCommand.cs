@@ -1,6 +1,6 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
+namespace Loupedeck.Plugins.SpotifyPremium.ParameterizedCommands
 {
     using System;
 

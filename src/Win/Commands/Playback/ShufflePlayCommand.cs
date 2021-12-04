@@ -1,10 +1,8 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
+namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
     using System;
-
-    using Commands;
 
     internal class ShufflePlayCommand : SpotifyCommand
     {

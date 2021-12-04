@@ -1,6 +1,6 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
+namespace Loupedeck.Plugins.SpotifyPremium.Commands.Volume
 {
     using System;
 

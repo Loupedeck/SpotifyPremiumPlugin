@@ -1,5 +1,5 @@
 ﻿
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.Plugins.SpotifyPremium
 {
     using System;
     using System.Collections.Generic;
