@@ -16,6 +16,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
         private List<Device> _devices;
 
         private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
+        protected SpotifyWrapper Wrapper => SpotifyPremiumPlugin.Wrapper;
 
         public DeviceSelectorCommandFolder()
         {
@@ -32,20 +33,15 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override IEnumerable<String> GetButtonPressActionNames()
         {
-            this._devices = this.SpotifyPremiumPlugin?.Api?.GetDevices()?.Devices;
-            if (this._devices != null && this._devices.Any())
-            {
-                this._devices.Add(new Device { Id = "activedevice", Name = "Active Device" });
-                return this._devices.Select(x => this.CreateCommandName(x.Id));
-            }
+            _devices = Wrapper.GetDevices();
 
-            return new List<String>();
+            return this._devices?.Any() == true ? this._devices.Select(x => this.CreateCommandName(x.Id)) : new List<String>();
         }
 
         public override String GetCommandDisplayName(String commandParameter, PluginImageSize imageSize)
         {
             var deviceDisplayName = this._devices.FirstOrDefault(x => x.Id == commandParameter)?.Name;
-            if (deviceDisplayName != null && !deviceDisplayName.Contains(" ") && deviceDisplayName.Length > 9)
+            if (deviceDisplayName?.Contains(" ") == false && deviceDisplayName.Length > 9)
             {
                 var updatedDisplayName = deviceDisplayName.Insert(9, "\n");
                 return updatedDisplayName.Length > 18 ? updatedDisplayName.Insert(18, "\n") : updatedDisplayName;
@@ -56,27 +52,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override void RunCommand(String commandParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.TransferPlayback, commandParameter);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify DeviceSelectorCommandFolder action obtain an error: ", e);
-            }
-        }
-
-        public ErrorResponse TransferPlayback(String commandParameter)
-        {
-            if (commandParameter == "activedevice")
-            {
-                commandParameter = String.Empty;
-            }
-
-            this.SpotifyPremiumPlugin.CurrentDeviceId = commandParameter;
-            this.SpotifyPremiumPlugin.SaveDeviceToCache(commandParameter);
-
-            return this.SpotifyPremiumPlugin.Api.TransferPlayback(this.SpotifyPremiumPlugin.CurrentDeviceId, true);
+            Wrapper.TransferPlayback(commandParameter);
         }
     }
 }

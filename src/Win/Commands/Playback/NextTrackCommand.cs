@@ -6,8 +6,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
     using Commands;
 
-    using SpotifyAPI.Web.Models;
-
     internal class NextTrackCommand : SpotifyCommand
     {
         public NextTrackCommand()
@@ -20,14 +18,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.SkipPlaybackToNext);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify NextTrackCommand action obtain an error: ", e);
-            }
+            Wrapper.SkipPlaybackToNext();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
@@ -35,7 +26,5 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
             var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.NextTrack.png");
             return bitmapImage;
         }
-
-        public ErrorResponse SkipPlaybackToNext() => this.SpotifyPremiumPlugin.Api.SkipPlaybackToNext(this.SpotifyPremiumPlugin.CurrentDeviceId);
     }
 }

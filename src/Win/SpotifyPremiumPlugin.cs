@@ -16,15 +16,13 @@ namespace Loupedeck.SpotifyPremiumPlugin
         // This plugin does not require an application (i.e. Spotify application installed on pc).
         public override Boolean HasNoApplication => true;
 
+        private SpotifyWrapper wrapper;
+
+        public SpotifyWrapper Wrapper => this.wrapper ?? (this.wrapper = new SpotifyWrapper(this));
+
         public override void Load()
         {
             this.LoadPluginIcons();
-
-            // Set everything ready and connect to Spotify API
-            this.SpotifyConfiguration();
-
-            // Get current (active) device id from internal cache
-            this.CurrentDeviceId = this.GetCachedDeviceID();
         }
 
         public override void Unload()
@@ -46,6 +44,17 @@ namespace Loupedeck.SpotifyPremiumPlugin
             this.Info.Icon32x32 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon32x32.png");
             this.Info.Icon48x48 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon48x48.png");
             this.Info.Icon256x256 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon256x256.png");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.wrapper?.Dispose();
+                this.wrapper = null;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

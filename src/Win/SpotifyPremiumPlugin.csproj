@@ -92,6 +92,7 @@
     <Compile Include="SpotifyPremiumApplication.cs" />
     <Compile Include="SpotifyPremiumPlugin.cs" />
     <Compile Include="Commands\Volume\ToggleMuteCommand.cs" />
+    <Compile Include="SpotifyWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PluginConfiguration.json" />

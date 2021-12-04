@@ -7,7 +7,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
     using Commands;
 
     using SpotifyAPI.Web.Enums;
-    using SpotifyAPI.Web.Models;
 
     internal class ChangeRepeatStateCommand : SpotifyCommand
     {
@@ -23,36 +22,8 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                var playback = this.SpotifyPremiumPlugin.Api.GetPlayback();
-                switch (playback.RepeatState)
-                {
-                    case RepeatState.Off:
-                        this._repeatState = RepeatState.Context;
-                        this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.ChangeRepeatState, this._repeatState);
-                        break;
-
-                    case RepeatState.Context:
-                        this._repeatState = RepeatState.Track;
-                        this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.ChangeRepeatState, this._repeatState);
-                        break;
-
-                    case RepeatState.Track:
-                        this._repeatState = RepeatState.Off;
-                        this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.ChangeRepeatState, this._repeatState);
-                        break;
-
-                    default:
-                        // Set plugin status and message
-                        this.SpotifyPremiumPlugin.CheckStatusCode(System.Net.HttpStatusCode.NotFound, "Not able to change repeat state (check device etc.)");
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify ChangeRepeatStateCommand action obtain an error: ", e);
-            }
+            this._repeatState= Wrapper.ChangeRepeatState();
+            this.ActionImageChanged();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
@@ -80,15 +51,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
             var bitmapImage = EmbeddedResources.ReadImage(icon);
             return bitmapImage;
-        }
-
-        public ErrorResponse ChangeRepeatState(RepeatState repeatState)
-        {
-            var response = this.SpotifyPremiumPlugin.Api.SetRepeatMode(repeatState, this.SpotifyPremiumPlugin.CurrentDeviceId);
-
-            this.ActionImageChanged();
-
-            return response;
         }
     }
 }

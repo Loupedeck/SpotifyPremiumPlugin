@@ -6,8 +6,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
     using Commands;
 
-    using SpotifyAPI.Web.Models;
-
     internal class ShufflePlayCommand : SpotifyCommand
     {
         private Boolean _shuffleState;
@@ -22,14 +20,9 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.ShufflePlay);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify ShufflePlayCommand action obtain an error: ", e);
-            }
+            this._shuffleState = Wrapper.ShufflePlay();
+
+            this.ActionImageChanged();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
@@ -37,17 +30,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Playback
             return this._shuffleState ?
                 EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Shuffle.png") :
                 EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.ShuffleOff.png");
-        }
-
-        public ErrorResponse ShufflePlay()
-        {
-            var playback = this.SpotifyPremiumPlugin.Api.GetPlayback();
-            this._shuffleState = !playback.ShuffleState;
-            var response = this.SpotifyPremiumPlugin.Api.SetShuffle(this._shuffleState, this.SpotifyPremiumPlugin.CurrentDeviceId);
-
-            this.ActionImageChanged();
-
-            return response;
         }
     }
 }

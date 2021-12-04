@@ -22,26 +22,13 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.StartPlaylist, actionParameter);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify StartPlaylistCommand action obtain an error: ", e);
-            }
-        }
-
-        public ErrorResponse StartPlaylist(String contextUri)
-        {
-            return this.SpotifyPremiumPlugin.Api.ResumePlayback(this.SpotifyPremiumPlugin.CurrentDeviceId, contextUri, null, String.Empty);
+            Wrapper.StartPlaylist(actionParameter);
         }
 
         protected override PluginActionParameter[] GetParameters()
         {
-            var playlists = this.SpotifyPremiumPlugin.GetAllPlaylists();
-            return playlists?.Items
-                        .Select(x => new PluginActionParameter(x.Uri, x.Name, String.Empty))
+            var playlists = Wrapper.GetAllPlaylists();
+            return playlists?.Select(x => new PluginActionParameter(x.Uri, x.Name, String.Empty))
                         .ToArray();
         }
     }

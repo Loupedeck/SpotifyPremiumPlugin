@@ -6,8 +6,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
     using Commands;
 
-    using SpotifyAPI.Web.Models;
-
     internal class DirectVolumeCommand : SpotifyCommand
     {
         public DirectVolumeCommand()
@@ -22,36 +20,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.ParameterizedCommands
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.SetVolume, actionParameter);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify DirectVolumeCommand action obtain an error: ", e);
-            }
-        }
-
-        public ErrorResponse SetVolume(String percents)
-        {
-            var isConverted = Int32.TryParse(percents, out var volume);
-            return isConverted ? this.SetVolume(volume) : null;
-        }
-
-        public ErrorResponse SetVolume(Int32 percents)
-        {
-            if (percents > 100)
-            {
-                percents = 100;
-            }
-
-            if (percents < 0)
-            {
-                percents = 0;
-            }
-
-            var response = this.SpotifyPremiumPlugin.Api.SetVolume(percents, this.SpotifyPremiumPlugin.CurrentDeviceId);
-            return response;
+            Wrapper.SetVolume(actionParameter);
         }
     }
 }

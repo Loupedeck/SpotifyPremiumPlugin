@@ -4,8 +4,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 {
     using System;
 
-    using SpotifyAPI.Web.Models;
-
     internal class UnmuteCommand : SpotifyCommand
     {
         public UnmuteCommand()
@@ -18,14 +16,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.Unmute);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify UnmuteCommand action obtain an error: ", e);
-            }
+            Wrapper.Unmute();
         }
 
 
@@ -33,13 +24,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands.Volume
         {
             var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Volume.png");
             return bitmapImage;
-        }
-
-        public ErrorResponse Unmute()
-        {
-            var unmuteVolume = this.SpotifyPremiumPlugin.PreviousVolume != 0 ? this.SpotifyPremiumPlugin.PreviousVolume : 50;
-            var result = this.SpotifyPremiumPlugin.Api.SetVolume(unmuteVolume, this.SpotifyPremiumPlugin.CurrentDeviceId);
-            return result;
         }
     }
 }

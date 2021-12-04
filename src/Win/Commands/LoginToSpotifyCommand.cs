@@ -14,6 +14,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.Commands
         {
         }
 
-        protected override void RunCommand(String actionParameter) => this.SpotifyPremiumPlugin.LoginToSpotify();
+        protected override void RunCommand(String actionParameter) => Wrapper.LoginToSpotify();
     }
 }
