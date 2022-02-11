@@ -3,30 +3,18 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
-    using SpotifyAPI.Web.Models;
 
     internal class PreviousTrackCommand : PluginDynamicCommand
     {
         private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
 
-        public PreviousTrackCommand()
-            : base(
-                  "Previous Track",
-                  "Previous Track description",
-                  "Playback")
+        public PreviousTrackCommand() : base("Previous Track", "Previous Track description", "Playback")
         {
         }
 
         protected override void RunCommand(String actionParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.SkipPlaybackToPrevious);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify PreviousTrackCommand action obtain an error: ", e);
-            }
+            this.SpotifyPremiumPlugin.Wrapper.SkipPlaybackToPrevious();
         }
 
         protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
@@ -34,7 +22,5 @@ namespace Loupedeck.SpotifyPremiumPlugin
             var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.PreviousTrack.png");
             return bitmapImage;
         }
-
-        public ErrorResponse SkipPlaybackToPrevious() => this.SpotifyPremiumPlugin.Api.SkipPlaybackToPrevious(this.SpotifyPremiumPlugin.CurrentDeviceId);
     }
 }

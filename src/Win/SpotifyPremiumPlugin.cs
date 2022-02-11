@@ -16,19 +16,19 @@ namespace Loupedeck.SpotifyPremiumPlugin
         // This plugin does not require an application (i.e. Spotify application installed on pc).
         public override Boolean HasNoApplication => true;
 
+        internal SpotifyWrapper Wrapper { get; private set; }
+
         public override void Load()
         {
             this.LoadPluginIcons();
 
-            // Set everything ready and connect to Spotify API
-            this.SpotifyConfiguration();
-
-            // Get current (active) device id from internal cache
-            this.CurrentDeviceId = this.GetCachedDeviceID();
+            this.Wrapper = new SpotifyWrapper(this.GetPluginDataDirectory());
+            this.Wrapper.WrapperStatusChanged += this.WrapperStatusParser;
         }
 
         public override void Unload()
         {
+            this.Wrapper.WrapperStatusChanged -= this.WrapperStatusParser;
         }
 
         public override void RunCommand(String commandName, String parameter)

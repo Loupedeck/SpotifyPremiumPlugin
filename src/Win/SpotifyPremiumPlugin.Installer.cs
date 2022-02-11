@@ -3,11 +3,10 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
+    using System.IO;
 
     public partial class SpotifyPremiumPlugin : Plugin
     {
-        public String ClientConfigurationFilePath => System.IO.Path.Combine(this.GetPluginDataDirectory(), "spotify-client.txt");
-
         public override Boolean Install()
         {
             // Here we ensure the plugin data directory is there.
@@ -20,12 +19,11 @@ namespace Loupedeck.SpotifyPremiumPlugin
             }
 
             // Now we put a template configuration file from resources
-            var filePath = System.IO.Path.Combine(pluginDataDirectory, this.ClientConfigurationFilePath);
-
-            using (var streamWriter = new System.IO.StreamWriter(filePath))
+            var filePath = SpotifyWrapper.GetClientConfigurationFilePath(pluginDataDirectory);
+            using (var streamWriter = new StreamWriter(filePath))
             {
                 // Write data
-                this.Assembly.ExtractFile("spotify-client-template.txt", this.ClientConfigurationFilePath);
+                this.Assembly.ExtractFile("spotify-client-template.txt", filePath);
             }
 
             return true;

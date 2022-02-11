@@ -1,20 +1,17 @@
-// Copyright (c) Loupedeck. All rights reserved.
-
-namespace Loupedeck.SpotifyPremiumPlugin
+﻿namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
     using System.Net;
-    using Loupedeck;
+
     using SpotifyAPI.Web.Models;
 
-    /// <summary>
-    /// Plugin: Check Spotify API responses
-    /// </summary>
-    public partial class SpotifyPremiumPlugin : Plugin
+    public partial class SpotifyWrapper
     {
+        public WrapperStatus Status { get; set; }
+
         public void CheckSpotifyResponse<T>(Func<T, ErrorResponse> apiCall, T param)
         {
-            if (!this.SpotifyApiConnectionOk())
+            if (!this.SpotifyApiConnected())
             {
                 return;
             }
@@ -26,7 +23,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
         public void CheckSpotifyResponse(Func<ErrorResponse> apiCall)
         {
-            if (!this.SpotifyApiConnectionOk())
+            if (!this.SpotifyApiConnected())
             {
                 return;
             }
@@ -50,27 +47,27 @@ namespace Loupedeck.SpotifyPremiumPlugin
                 case HttpStatusCode.ResetContent:
                 case HttpStatusCode.PartialContent:
 
-                    if (this.PluginStatus.Status != Loupedeck.PluginStatus.Normal)
+                    if (this.Status != WrapperStatus.Normal)
                     {
-                        this.OnPluginStatusChanged(Loupedeck.PluginStatus.Normal, null, null);
+                        this.OnWrapperStatusChanged(WrapperStatus.Normal, null, null);
                     }
 
                     break;
 
                 case HttpStatusCode.Unauthorized:
                     // This should never happen?
-                    this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, "Login to Spotify", null);
+                    this.OnWrapperStatusChanged(WrapperStatus.Error, "Login to Spotify", null);
                     break;
 
                 case HttpStatusCode.NotFound:
                     // User doesn't have device set or some other Spotify related thing. User action needed.
-                    this.OnPluginStatusChanged(Loupedeck.PluginStatus.Warning, $"Spotify message: {spotifyApiMessage}", null);
+                    this.OnWrapperStatusChanged(WrapperStatus.Warning, $"Spotify message: {spotifyApiMessage}", null);
                     break;
 
                 default:
-                    if (this.PluginStatus.Status != Loupedeck.PluginStatus.Error)
+                    if (this.Status != WrapperStatus.Error)
                     {
-                        this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, spotifyApiMessage, null);
+                        this.OnWrapperStatusChanged(WrapperStatus.Error, spotifyApiMessage, null);
                     }
 
                     break;

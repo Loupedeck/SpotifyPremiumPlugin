@@ -32,7 +32,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override IEnumerable<String> GetButtonPressActionNames()
         {
-            this._devices = this.SpotifyPremiumPlugin?.Api?.GetDevices()?.Devices;
+            this._devices = this.SpotifyPremiumPlugin.Wrapper.GetDevices();
             if (this._devices != null && this._devices.Any())
             {
                 this._devices.Add(new Device { Id = "activedevice", Name = "Active Device" });
@@ -56,27 +56,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
 
         public override void RunCommand(String commandParameter)
         {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.TransferPlayback, commandParameter);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify DeviceSelectorCommandFolder action obtain an error: ", e);
-            }
-        }
-
-        public ErrorResponse TransferPlayback(String commandParameter)
-        {
-            if (commandParameter == "activedevice")
-            {
-                commandParameter = String.Empty;
-            }
-
-            this.SpotifyPremiumPlugin.CurrentDeviceId = commandParameter;
-            this.SpotifyPremiumPlugin.SaveDeviceToCache(commandParameter);
-
-            return this.SpotifyPremiumPlugin.Api.TransferPlayback(this.SpotifyPremiumPlugin.CurrentDeviceId, true);
+            this.SpotifyPremiumPlugin.Wrapper.TransferPlayback(commandParameter);
         }
     }
 }

@@ -1,6 +1,4 @@
-// Copyright (c) Loupedeck. All rights reserved.
-
-namespace Loupedeck.SpotifyPremiumPlugin
+﻿namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
     using System.Collections.Generic;
@@ -8,21 +6,16 @@ namespace Loupedeck.SpotifyPremiumPlugin
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using Loupedeck;
+
     using Newtonsoft.Json;
+
     using SpotifyAPI.Web;
     using SpotifyAPI.Web.Auth;
+    using SpotifyAPI.Web.Enums;
     using SpotifyAPI.Web.Models;
 
-    /// <summary>
-    /// Plugin Spotify API configuration and authorization
-    /// </summary>
-    public partial class SpotifyPremiumPlugin : Plugin
+    public partial class SpotifyWrapper
     {
-        private const String _clientId = "ClientId";
-        private const String _clientSecret = "ClientSecret";
-        private const String _tcpPorts = "TcpPorts";
-
         private static Token token = new Token();
         private static AuthorizationCodeAuth auth;
         private static String spotifyTokenFilePath;
@@ -31,13 +24,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
         private List<Int32> tcpPorts = new List<Int32>();
 
-        internal SpotifyWebAPI Api { get; set; }
-
-        internal String CurrentDeviceId { get; set; }
-
-        internal Int32 PreviousVolume { get; set; }
-
-        public Boolean SpotifyApiConnectionOk()
+        public Boolean SpotifyApiConnected()
         {
             if (this.Api == null)
             {
@@ -66,15 +53,15 @@ namespace Loupedeck.SpotifyPremiumPlugin
                 Directory.CreateDirectory(Path.GetDirectoryName(spotifyClientConfigurationFile));
 
                 // Create the file
-                using (FileStream fs = File.Create(spotifyClientConfigurationFile))
+                using (FileStream fileStream = File.Create(spotifyClientConfigurationFile))
                 {
                     var info = new UTF8Encoding(true).GetBytes($"{_clientId}{Environment.NewLine}{_clientSecret}{Environment.NewLine}{_tcpPorts}");
 
                     // Add parameter titles to file.
-                    fs.Write(info, 0, info.Length);
+                    fileStream.Write(info, 0, info.Length);
                 }
 
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, $"Spotify configuration is missing. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                this.OnWrapperStatusChanged(WrapperStatus.Error, $"Spotify configuration is missing. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
@@ -88,7 +75,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
                 _spotifyConfiguration.ContainsKey(_clientSecret) &&
                 _spotifyConfiguration.ContainsKey(_tcpPorts)))
             {
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, $"Check Spotify API app 'ClientId' / 'ClientSecret' and 'TcpPorts' in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                this.OnWrapperStatusChanged(WrapperStatus.Error, $"Check Spotify API app 'ClientId' / 'ClientSecret' and 'TcpPorts' in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
@@ -102,14 +89,14 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
             if (this.tcpPorts.Count == 0)
             {
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, $"Check 'TcpPorts' values in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
+                this.OnWrapperStatusChanged(WrapperStatus.Error, $"Check 'TcpPorts' values in configuration file. Click More Details below", $"file:/{spotifyClientConfigurationFile}");
                 return false;
             }
 
             return true;
         }
 
-        private void SpotifyConfiguration()
+        public void ReadSpotifyConfiguration()
         {
             if (!this.ReadConfigurationFile())
             {
@@ -118,7 +105,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
             // Is there a token available
             token = null;
-            spotifyTokenFilePath = System.IO.Path.Combine(this.GetPluginDataDirectory(), "spotify.json");
+            spotifyTokenFilePath = Path.Combine(this._cacheDirectory, "spotify.json");
             if (File.Exists(spotifyTokenFilePath))
             {
                 token = this.ReadTokenFromLocalFile();
@@ -133,9 +120,9 @@ namespace Loupedeck.SpotifyPremiumPlugin
                     AccessToken = token.AccessToken,
                     TokenType = "Bearer",
                 };
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Normal, "Connected", null);
+                this.OnWrapperStatusChanged(WrapperStatus.Normal, "Connected", null);
             }
-            else if (token != null && !String.IsNullOrEmpty(token.RefreshToken))
+            else if (!String.IsNullOrEmpty(token?.RefreshToken))
             {
                 // Get a new access token based on the Refresh Token
                 this.RefreshToken(token.RefreshToken);
@@ -143,8 +130,8 @@ namespace Loupedeck.SpotifyPremiumPlugin
             else
             {
                 // User has to login from Loupedeck application Plugin UI: Login - Login to Spotify. See LoginToSpotifyCommand.cs
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, "Login to Spotify as Premium user", null);
-           }
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Login to Spotify as Premium user", null);
+            }
         }
 
         private Token ReadTokenFromLocalFile()
@@ -153,7 +140,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
             var localToken = JsonConvert.DeserializeObject<Token>(json);
 
             // Decrypt refresh token
-            if (localToken != null && !String.IsNullOrEmpty(localToken.RefreshToken))
+            if (!String.IsNullOrEmpty(localToken?.RefreshToken))
             {
                 var secret = Convert.FromBase64String(localToken.RefreshToken);
                 var plain = ProtectedData.Unprotect(secret, null, DataProtectionScope.CurrentUser);
@@ -184,7 +171,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
             if (!String.IsNullOrWhiteSpace(newToken.Error))
             {
                 Tracer.Error($"Error happened during refreshing Spotify account token: {newToken.Error}: {newToken.ErrorDescription}");
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Error, "Failed getting access to Spotify. Login as Premium user", null);
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Failed getting access to Spotify. Login as Premium user", null);
             }
 
             if (this.Api == null)
@@ -196,62 +183,10 @@ namespace Loupedeck.SpotifyPremiumPlugin
                 };
             }
 
-            this.OnPluginStatusChanged(Loupedeck.PluginStatus.Normal, "Connected", null);
+            this.OnWrapperStatusChanged(WrapperStatus.Normal, "Connected", null);
 
             this.Api.AccessToken = newToken.AccessToken;
             this.SaveTokenToLocalFile(newToken, refreshToken);
-        }
-
-        private PrivateProfile _privateProfile;
-
-        private Paging<SimplePlaylist> GetUserPlaylists(Int32 offset = 0)
-        {
-            if (this.Api != null)
-            {
-                try
-                {
-                    if (this._privateProfile == null)
-                    {
-                        this._privateProfile = this.Api.GetPrivateProfile();
-                    }
-
-                    var profileId = this._privateProfile?.Id;
-                    if (!String.IsNullOrEmpty(profileId))
-                    {
-                        var playlists = this.Api.GetUserPlaylists(profileId, 50, offset);
-                        if (playlists?.Items != null && playlists.Items.Any())
-                        {
-                            return playlists;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Tracer.Trace(e, "Spotify playlists obtaining error");
-                }
-            }
-
-            return new Paging<SimplePlaylist>
-            {
-                Items = new List<SimplePlaylist>(),
-            };
-        }
-
-        public Paging<SimplePlaylist> GetAllPlaylists()
-        {
-            Paging<SimplePlaylist> playlists = this.GetUserPlaylists();
-            if (playlists != null)
-            {
-                var totalPlaylistsCount = playlists.Total;
-                while (playlists.Items.Count < totalPlaylistsCount)
-                {
-                    playlists.Items.AddRange(this.GetUserPlaylists(playlists.Items.Count).Items);
-                }
-
-                return playlists;
-            }
-
-            return null;
         }
 
         public void LoginToSpotify()
@@ -283,7 +218,7 @@ namespace Loupedeck.SpotifyPremiumPlugin
                     TokenType = previousToken.TokenType,
                 };
 
-                this.OnPluginStatusChanged(Loupedeck.PluginStatus.Normal, null, null);
+                this.OnWrapperStatusChanged(WrapperStatus.Normal, null, null);
 
                 this.SaveTokenToLocalFile(previousToken, previousToken.RefreshToken);
             }
@@ -304,26 +239,26 @@ namespace Loupedeck.SpotifyPremiumPlugin
             }
 
             var scopes =
-                SpotifyAPI.Web.Enums.Scope.PlaylistReadPrivate |
-                SpotifyAPI.Web.Enums.Scope.Streaming |
-                SpotifyAPI.Web.Enums.Scope.UserReadCurrentlyPlaying |
-                SpotifyAPI.Web.Enums.Scope.UserReadPlaybackState |
-                SpotifyAPI.Web.Enums.Scope.UserLibraryRead |
-                SpotifyAPI.Web.Enums.Scope.UserLibraryModify |
-                SpotifyAPI.Web.Enums.Scope.UserReadPrivate |
-                SpotifyAPI.Web.Enums.Scope.UserModifyPlaybackState |
-                SpotifyAPI.Web.Enums.Scope.PlaylistReadCollaborative |
-                SpotifyAPI.Web.Enums.Scope.PlaylistModifyPublic |
-                SpotifyAPI.Web.Enums.Scope.PlaylistModifyPrivate |
-                SpotifyAPI.Web.Enums.Scope.PlaylistReadPrivate |
-                SpotifyAPI.Web.Enums.Scope.UserReadEmail;
+                Scope.PlaylistReadPrivate |
+                Scope.Streaming |
+                Scope.UserReadCurrentlyPlaying |
+                Scope.UserReadPlaybackState |
+                Scope.UserLibraryRead |
+                Scope.UserLibraryModify |
+                Scope.UserReadPrivate |
+                Scope.UserModifyPlaybackState |
+                Scope.PlaylistReadCollaborative |
+                Scope.PlaylistModifyPublic |
+                Scope.PlaylistModifyPrivate |
+                Scope.PlaylistReadPrivate |
+                Scope.UserReadEmail;
 
             return !this.ReadConfigurationFile()
                 ? null
                 : new AuthorizationCodeAuth(
-                    _spotifyConfiguration[_clientId], // Spotify API Client Id
+                    _spotifyConfiguration[_clientId],     // Spotify API Client Id
                     _spotifyConfiguration[_clientSecret], // Spotify API Client Secret
-                    $"http://localhost:{selectedPort}", // selectedPort must correspond to that on the Spotify developers's configuration!
+                    $"http://localhost:{selectedPort}",   // selectedPort must correspond to that on the Spotify developers's configuration!
                     $"http://localhost:{selectedPort}",
                     scopes);
         }

@@ -1,25 +1,27 @@
-﻿// Copyright (c) Loupedeck. All rights reserved.
-
-namespace Loupedeck.SpotifyPremiumPlugin
+﻿namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
     using System.IO;
-
-    /// <summary>
-    /// Plugin: Store Spotify devices locally
-    /// </summary>
-    public partial class SpotifyPremiumPlugin : Plugin
+    
+    public partial class SpotifyWrapper
     {
-        private readonly String _deviceCacheFileName = "CachedDevice.txt";
+        private readonly String _cacheDirectory;
+
+        private readonly String _deviceCacheFileName = "CachedDevice";
 
         private readonly Object _locker = new Object();
 
-        private String GetCacheFilePath(String fileName) => Path.Combine(this.GetPluginDataDirectory(), "Cache", fileName);
+        public static String GetClientConfigurationFilePath(String cacheDirectory) => Path.Combine(cacheDirectory, ClientConfigurationFileName);
+
+        public static String ClientConfigurationFileName => "spotify-client.txt";
+
+        public String ClientConfigurationFilePath => Path.Combine(this._cacheDirectory, ClientConfigurationFileName);
+
+        private String GetCacheFilePath(String fileName) => Path.Combine(this._cacheDirectory, fileName);
 
         public void SaveDeviceToCache(String deviceId)
         {
-            var cacheDirectory = Path.Combine(this.GetPluginDataDirectory(), "Cache");
-
+            var cacheDirectory = this._cacheDirectory;
             if (!Directory.Exists(cacheDirectory))
             {
                 try

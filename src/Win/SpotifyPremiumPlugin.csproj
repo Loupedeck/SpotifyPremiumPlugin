@@ -75,9 +75,7 @@
     <Compile Include="ParameterizedCommands\SaveToPlaylistCommand.cs" />
     <Compile Include="ParameterizedCommands\DirectVolumeCommand.cs" />
     <Compile Include="ParameterizedCommands\StartPlaylistCommand.cs" />
-    <Compile Include="SpotifyPremiumPlugin.ApiResponse.cs" />
-    <Compile Include="SpotifyPremiumPlugin.Api.cs" />
-    <Compile Include="SpotifyPremiumPlugin.DevicesSelector.cs" />
+    <Compile Include="SpotifyPremiumPlugin.Statuses.cs" />
     <Compile Include="SpotifyPremiumPlugin.Installer.cs" />
     <Compile Include="Commands\LoginToSpotifyCommand.cs" />
     <Compile Include="Commands\Playback\TogglePlaybackCommand.cs" />
@@ -90,6 +88,11 @@
     <Compile Include="SpotifyPremiumApplication.cs" />
     <Compile Include="SpotifyPremiumPlugin.cs" />
     <Compile Include="Commands\Volume\ToggleMuteCommand.cs" />
+    <Compile Include="Wrapper\SpotifyWrapper.cs" />
+    <Compile Include="Wrapper\SpotifyWrapper.Authentification.cs" />
+    <Compile Include="Wrapper\SpotifyWrapper.Cache.cs" />
+    <Compile Include="Wrapper\SpotifyWrapper.Events.cs" />
+    <Compile Include="Wrapper\SpotifyWrapper.Responses.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PluginConfiguration.json" />
