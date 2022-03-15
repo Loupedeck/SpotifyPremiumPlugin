@@ -3,34 +3,54 @@
     using System;
     using System.Net;
 
-    using SpotifyAPI.Web.Models;
+    using SpotifyAPI.Web;
 
     public partial class SpotifyWrapper
     {
-        public WrapperStatus Status { get; set; }
+        public WrapperStatus Status { get; private set; }
 
-        public void CheckSpotifyResponse<T>(Func<T, ErrorResponse> apiCall, T param)
+        public TResult CheckSpotifyResponse<T, TResult>(Func<T, TResult> apiMethod, T parameter)
         {
-            if (!this.SpotifyApiConnected())
+            try
             {
-                return;
+                return apiMethod(parameter);
+            }
+            catch (APIUnauthorizedException)
+            {
+                this.StartLogin();
+            }
+            catch (APITooManyRequestsException)
+            {
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Too many requests!", null);
+            }
+            catch (APIException apiException)
+            {
+                this.CheckStatusCode(apiException.Response.StatusCode, apiException.Message);
             }
 
-            var response = apiCall(param);
-
-            this.CheckStatusCode(response.StatusCode(), response.Error?.Message);
+            return default;
         }
 
-        public void CheckSpotifyResponse(Func<ErrorResponse> apiCall)
+        public TResult CheckSpotifyResponse<TResult>(Func<TResult> apiMethod)
         {
-            if (!this.SpotifyApiConnected())
+            try
             {
-                return;
+                return apiMethod();
+            }
+            catch (APIUnauthorizedException)
+            {
+                this.StartLogin();
+            }
+            catch (APITooManyRequestsException)
+            {
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Too many requests!", null);
+            }
+            catch (APIException apiException)
+            {
+                this.CheckStatusCode(apiException.Response.StatusCode, apiException.Message);
             }
 
-            var response = apiCall();
-
-            this.CheckStatusCode(response.StatusCode(), response.Error?.Message);
+            return default;
         }
 
         internal void CheckStatusCode(HttpStatusCode statusCode, String spotifyApiMessage)

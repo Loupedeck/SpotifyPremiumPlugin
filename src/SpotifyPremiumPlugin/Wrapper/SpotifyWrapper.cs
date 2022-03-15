@@ -3,24 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
     using System.Timers;
 
     using SpotifyAPI.Web;
-    using SpotifyAPI.Web.Enums;
-    using SpotifyAPI.Web.Models;
 
-    public partial class SpotifyWrapper : IDisposable
+    public partial class SpotifyWrapper
     {
-        private const String _clientIdName = "ClientId";
-        private const String _clientSecretName = "ClientSecret";
-        private const String _tcpPortsName = "TcpPorts";
+        public SpotifyClient Client { get; private set; }
 
-        private PrivateProfile _privateProfile;
-
-        internal SpotifyWebAPI Api { get; set; }
-
-        public RepeatState CachedRepeatState { get; private set; }
+        public PlayerSetRepeatRequest.State CachedRepeatState { get; private set; }
 
         public Boolean CachedShuffleState { get; private set; }
 
@@ -43,11 +34,9 @@
         public SpotifyWrapper(String cacheDirectory)
         {
             this._cacheDirectory = cacheDirectory;
-            this.ReadSpotifyConfiguration();
+            this.StartAuth();
             this.CurrentDeviceId = this.GetCachedDeviceID();
         }
-
-        public void Dispose() => this.Api?.Dispose();
 
         /// <summary>
         /// Gets or sets Volume. Used when muting to remember the previous volume.  Used for dials when
@@ -79,8 +68,8 @@
 
             this.PreviousVolume = percents;
 
-            ErrorResponse Func() => this.Api.SetVolume(percents, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            var request = new PlayerVolumeRequest(percents) { DeviceId = this._currentDeviceId };
+            this.CheckSpotifyResponse(this.Client.Player.SetVolume, request);
         }
 
         private Boolean _volumeCallsBlocked;
@@ -101,16 +90,16 @@
             }
             else
             {
-                var playback = this.Api.GetPlayback();
+                var playback = this.GetCurrentPlayback();
                 if (playback?.Device == null)
                 {
                     // Set plugin status and message
-                    this.CheckStatusCode(HttpStatusCode.NotFound, "Cannot adjust volume, no device");
+                    this.OnWrapperStatusChanged(WrapperStatus.Warning, "Cannot adjust volume, no device", null);
                     return;
                 }
                 else
                 {
-                    modifiedVolume = playback.Device.VolumePercent + ticks;
+                    modifiedVolume = (Int32)playback.Device.VolumePercent + ticks;
                 }
             }
 
@@ -138,23 +127,21 @@
 
         public void Mute()
         {
-            var playback = this.Api.GetPlayback();
-
-            if (playback?.Device?.VolumePercent > 0)
+            var playback = this.GetCurrentPlayback();
+            var volumePercent = playback?.Device?.VolumePercent;
+            if (volumePercent > 0)
             {
-                this.PreviousVolume = playback.Device.VolumePercent;
+                this.PreviousVolume = (Int32)volumePercent;
             }
 
-            ErrorResponse Func() => this.Api.SetVolume(0, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            this.SetVolume(0);
         }
 
         public void Unmute()
         {
             var unmuteVolume = this.PreviousVolume != 0 ? this.PreviousVolume : 50;
 
-            ErrorResponse Func() => this.Api.SetVolume(unmuteVolume, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            this.SetVolume(unmuteVolume);
         }
 
         /// <summary>
@@ -163,7 +150,7 @@
         /// <returns>true if muted after this call</returns>
         public Boolean ToggleMute()
         {
-            var playback = this.Api.GetPlayback();
+            var playback = this.GetCurrentPlayback();
 
             if (playback?.Device.VolumePercent != 0)
             {
@@ -188,93 +175,86 @@
 
             this.CurrentDeviceId = commandParameter;
 
-            ErrorResponse Func() => this.Api.TransferPlayback(this.CurrentDeviceId, true);
-            this.CheckSpotifyResponse(Func);
+            this.CheckSpotifyResponse(this.Client.Player.TransferPlayback, new PlayerTransferPlaybackRequest(new[] { this.CurrentDeviceId }));
         }
 
-        public Boolean TogglePlayback()
+        public void TogglePlayback()
         {
-            var playback = this.Api.GetPlayback();
-
+            var playback = this.Client.Player.GetCurrentPlayback().Result;
             if (playback.IsPlaying)
             {
-                this.CheckSpotifyResponse(this.Api.PausePlayback, this.CurrentDeviceId);
+                this.Client.Player.PausePlayback(new PlayerPausePlaybackRequest() { DeviceId = this.CurrentDeviceId });
             }
             else
             {
-                ErrorResponse Func() => this.Api.ResumePlayback(this.CurrentDeviceId, String.Empty, null, String.Empty, 0);
-                this.CheckSpotifyResponse(Func);
+                this.Client.Player.ResumePlayback(new PlayerResumePlaybackRequest() { DeviceId = this.CurrentDeviceId });
             }
 
-            return this.CachedPlayingState = !playback.IsPlaying; // presume we switched it at this point.
+            this.CachedPlayingState = !playback.IsPlaying; // presume we switched it at this point.
         }
 
-        public void SkipPlaybackToNext() => this.CheckSpotifyResponse(this.Api.SkipPlaybackToNext, this.CurrentDeviceId);
+        public void SkipPlaybackToNext() => this.CheckSpotifyResponse(this.Client.Player.SkipNext);
 
-        public void SkipPlaybackToPrevious() => this.CheckSpotifyResponse(this.Api.SkipPlaybackToPrevious, this.CurrentDeviceId);
+        public void SkipPlaybackToPrevious() => this.CheckSpotifyResponse(this.Client.Player.SkipPrevious);
 
-        public RepeatState ChangeRepeatState()
+        public PlayerSetRepeatRequest.State ChangeRepeatState()
         {
-            var playback = this.Api.GetPlayback();
+            var playback = this.GetCurrentPlayback();
 
-            RepeatState newRepeatState = RepeatState.Off;
+            var newRepeatState = PlayerSetRepeatRequest.State.Off;
 
-            switch (playback.RepeatState)
+            switch (playback.RepeatState.ToLower())
             {
-                case RepeatState.Off:
-                    newRepeatState = RepeatState.Context;
+                case "off":
+                    newRepeatState = PlayerSetRepeatRequest.State.Context;
                     break;
 
-                case RepeatState.Context:
-                    newRepeatState = RepeatState.Track;
+                case "context":
+                    newRepeatState = PlayerSetRepeatRequest.State.Track;
                     break;
 
-                case RepeatState.Track:
-                    newRepeatState = RepeatState.Off;
+                case "track":
+                    newRepeatState = PlayerSetRepeatRequest.State.Off;
                     break;
 
                 default:
                     // Set plugin status and message
-                    this.CheckStatusCode(HttpStatusCode.NotFound, "Not able to change repeat state (check device etc.)");
+                    this.OnWrapperStatusChanged(WrapperStatus.Warning, "Not able to change repeat state (check device etc.)", null);
                     break;
             }
 
             this.CachedRepeatState = newRepeatState;
 
-            ErrorResponse Func() => this.Api.SetRepeatMode(newRepeatState, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            this.CheckSpotifyResponse(this.Client.Player.SetRepeat, new PlayerSetRepeatRequest(newRepeatState) { DeviceId = this.CurrentDeviceId });
 
             return newRepeatState;
         }
 
         public Boolean ShufflePlay()
         {
-            var playback = this.Api.GetPlayback();
+            var playback = this.GetCurrentPlayback();
             var shuffleState = !playback.ShuffleState;
 
-            ErrorResponse Func() => this.Api.SetShuffle(shuffleState, this.CurrentDeviceId);
-            this.CheckSpotifyResponse(Func);
+            this.CheckSpotifyResponse(this.Client.Player.SetShuffle, new PlayerShuffleRequest(shuffleState) { DeviceId = this.CurrentDeviceId });
 
             this.CachedShuffleState = shuffleState;
 
             return shuffleState;
         }
 
-        public void StartPlaylist(String contextUri)
-        {
-            ErrorResponse Func() => this.Api.ResumePlayback(this.CurrentDeviceId, contextUri, null, String.Empty);
-            this.CheckSpotifyResponse(Func);
-        }
+        public void StartPlaylist(String contextUri) =>
+            this.CheckSpotifyResponse(this.Client.Player.ResumePlayback, new PlayerResumePlaybackRequest() { ContextUri = contextUri, DeviceId = this.CurrentDeviceId });
 
         public void SaveToPlaylist(String playlistId)
         {
             playlistId = playlistId.Replace("spotify:playlist:", String.Empty);
 
-            var playback = this.Api.GetPlayback();
-            var currentTrackUri = playback.Item.Uri;
-
-            ErrorResponse Func() => this.Api.AddPlaylistTrack(playlistId, currentTrackUri);
-            this.CheckSpotifyResponse(Func);
+            var playbackResponse = this.GetCurrentPlayback();
+            if (playbackResponse.Item is FullTrack track)
+            {
+                SnapshotResponse GetPlayistAddResponse() => this.Client.Playlists.AddItems(playlistId, new PlaylistAddItemsRequest(new[] { track.Uri })).Result;
+                this.CheckSpotifyResponse(GetPlayistAddResponse);
+            }
         }
 
         public List<SimplePlaylist> GetAllPlaylists()
@@ -296,40 +276,15 @@
 
         private Paging<SimplePlaylist> GetUserPlaylists(Int32 offset = 0)
         {
-            if (this.Api != null)
-            {
-                try
-                {
-                    if (this._privateProfile == null)
-                    {
-                        this._privateProfile = this.Api.GetPrivateProfile();
-                    }
-
-                    var profileId = this._privateProfile?.Id;
-                    if (!String.IsNullOrEmpty(profileId))
-                    {
-                        var playlists = this.Api.GetUserPlaylists(profileId, 50, offset);
-                        if (playlists?.Items?.Any() == true)
-                        {
-                            return playlists;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Tracer.Trace(e, "Error obtaining Spotify playlists");
-                }
-            }
-
-            return new Paging<SimplePlaylist>
-            {
-                Items = new List<SimplePlaylist>(),
-            };
+            var userProfile = this.CheckSpotifyResponse(this.Client.UserProfile.Current).Result;
+            Paging<SimplePlaylist> GetUsers() => this.Client.Playlists.GetUsers(userProfile.Id, new PlaylistGetUsersRequest() { Limit = 50, Offset = offset }).Result;
+            return this.CheckSpotifyResponse(GetUsers);
         }
 
         public List<Device> GetDevices()
         {
-            var devices = this.Api?.GetDevices()?.Devices;
+            var devicesResponse = this.CheckSpotifyResponse(this.Client.Player.GetAvailableDevices).Result;
+            var devices = devicesResponse.Devices;
 
             if (devices?.Any() == true)
             {
@@ -339,36 +294,42 @@
             return devices;
         }
 
-        public Boolean ToggleLike()
+        public void ToggleLike()
         {
-            var playback = this.Api.GetPlayback();
-            var trackId = playback.Item?.Id;
-            if (String.IsNullOrEmpty(trackId))
+            var currentlyPlaying = this.GetCurrentPlayback();
+            switch (currentlyPlaying.Item)
             {
-                // Set plugin status and message
-                this.CheckStatusCode(HttpStatusCode.NotFound, "No track");
-                return this.CachedMuteState = false;
-            }
+                case FullTrack track:
+                    var trackId = new[] { track.Id };
+                    var trackLikedResponse = this.CheckSpotifyResponse(this.Client.Library.CheckTracks, new LibraryCheckTracksRequest(trackId));
+                    var trackLiked = trackLikedResponse.Result.FirstOrDefault();
+                    if (trackLiked)
+                    {
+                        this.CheckSpotifyResponse(this.Client.Library.RemoveTracks, new LibraryRemoveTracksRequest(trackId));
+                    }
+                    else
+                    {
+                        this.CheckSpotifyResponse(this.Client.Library.SaveTracks, new LibrarySaveTracksRequest(trackId));
+                    }
+                    break;
 
-            var trackItemId = new List<String> { trackId };
-            var tracksExist = this.Api.CheckSavedTracks(trackItemId);
-            if (tracksExist.List == null && tracksExist.Error != null)
-            {
-                // Set plugin status and message
-                this.CheckStatusCode(HttpStatusCode.NotFound, "No track list");
-                return this.CachedMuteState = false;
-            }
-
-            if (tracksExist.List.Any() && tracksExist.List.FirstOrDefault() == false)
-            {
-                this.CheckSpotifyResponse(this.Api.SaveTrack, trackId);
-                return this.CachedMuteState = true;
-            }
-            else
-            {
-                this.CheckSpotifyResponse(this.Api.RemoveSavedTracks, trackItemId);
-                return this.CachedMuteState = false;
+                case FullEpisode episode:
+                    var episodeId = new[] { episode.Id };
+                    var episodeLikedResponse = this.CheckSpotifyResponse(this.Client.Library.CheckEpisodes, new LibraryCheckEpisodesRequest(episodeId));
+                    var episodeLiked = episodeLikedResponse.Result.FirstOrDefault();
+                    if (episodeLiked)
+                    {
+                        this.CheckSpotifyResponse(this.Client.Library.RemoveEpisodes, new LibraryRemoveEpisodesRequest(episodeId));
+                    }
+                    else
+                    {
+                        this.CheckSpotifyResponse(this.Client.Library.SaveEpisodes, new LibrarySaveEpisodesRequest(episodeId));
+                    }
+                    break;
             }
         }
+
+        public CurrentlyPlayingContext GetCurrentPlayback() =>
+            this.CheckSpotifyResponse(this.Client.Player.GetCurrentPlayback).Result;
     }
 }

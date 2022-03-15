@@ -3,7 +3,8 @@
 namespace Loupedeck.SpotifyPremiumPlugin
 {
     using System;
-    using SpotifyAPI.Web.Enums;
+
+    using SpotifyAPI.Web;
 
     internal class ChangeRepeatStateCommand : PluginDynamicCommand
     {
@@ -21,15 +22,15 @@ namespace Loupedeck.SpotifyPremiumPlugin
             String icon;
             switch (this.SpotifyPremiumPlugin.Wrapper.CachedRepeatState)
             {
-                case RepeatState.Off:
+                case PlayerSetRepeatRequest.State.Off:
                     icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatOff.png";
                     break;
 
-                case RepeatState.Context:
+                case PlayerSetRepeatRequest.State.Context:
                     icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.RepeatList.png";
                     break;
 
-                case RepeatState.Track:
+                case PlayerSetRepeatRequest.State.Track:
                     icon = "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.Repeat.png";
                     break;
 

@@ -13,7 +13,7 @@
 
         public static String GetClientConfigurationFilePath(String cacheDirectory) => Path.Combine(cacheDirectory, ClientConfigurationFileName);
 
-        public static String ClientConfigurationFileName => "spotify-client.txt";
+        public static String ClientConfigurationFileName => "spotify-client.yml";
 
         public String ClientConfigurationFilePath => Path.Combine(this._cacheDirectory, ClientConfigurationFileName);
 

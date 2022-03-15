@@ -12,6 +12,6 @@ namespace Loupedeck.SpotifyPremiumPlugin
         {
         }
 
-        protected override void RunCommand(String actionParameter) => (this.Plugin as SpotifyPremiumPlugin).Wrapper.LoginToSpotify();
+        protected override void RunCommand(String actionParameter) => (this.Plugin as SpotifyPremiumPlugin).Wrapper.StartLogin();
     }
 }

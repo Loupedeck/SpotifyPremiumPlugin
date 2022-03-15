@@ -6,7 +6,7 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
     using System.Collections.Generic;
     using System.Linq;
 
-    using SpotifyAPI.Web.Models;
+    using SpotifyAPI.Web;
 
     /// <summary>
     /// Dynamic folder (control center) for Spotify devices. https://developer.loupedeck.com/docs/Actions-taxonomy
