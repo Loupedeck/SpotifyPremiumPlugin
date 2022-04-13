@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("LoupeDeck Oy")]
 [assembly: AssemblyProduct("Spotify Premium Plugin for Loupedeck Software")]
-[assembly: AssemblyCopyright("Copyright (c) 2021 LoupeDeck Oy. All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright (c) 2022 LoupeDeck Oy. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

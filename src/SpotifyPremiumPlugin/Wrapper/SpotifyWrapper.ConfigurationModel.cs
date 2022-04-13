@@ -7,8 +7,8 @@
     {
         public String ClientId { get; set; }
 
-        public String SecretId { get; set; }
+        public String ClientSecret { get; set; }
 
-        public List<Int32> Ports { get; set; }
+        public List<Int32> TcpPorts { get; set; }
     }
 }

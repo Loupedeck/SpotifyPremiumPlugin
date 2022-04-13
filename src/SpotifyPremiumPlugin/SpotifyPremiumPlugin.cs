@@ -24,6 +24,9 @@ namespace Loupedeck.SpotifyPremiumPlugin
 
             this.Wrapper = new SpotifyWrapper(this.GetPluginDataDirectory());
             this.Wrapper.WrapperStatusChanged += this.WrapperStatusParser;
+            this.Wrapper.Init();
+
+            this.ServiceEvents.UrlCallbackReceived += this.OnUrlCallbackReceived;
         }
 
         public override void Unload() => this.Wrapper.WrapperStatusChanged -= this.WrapperStatusParser;
@@ -43,6 +46,14 @@ namespace Loupedeck.SpotifyPremiumPlugin
             this.Info.Icon32x32 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon32x32.png");
             this.Info.Icon48x48 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon48x48.png");
             this.Info.Icon256x256 = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.PluginIcon256x256.png");
+        }
+
+        private void OnUrlCallbackReceived(Object sender, UrlCallbackReceivedEventArgs e)
+        {
+            if ((e.Uri != null) && e.Uri.LocalPath.Equals("login"))
+            {
+                this.Wrapper.StartLogin();
+            }
         }
     }
 }

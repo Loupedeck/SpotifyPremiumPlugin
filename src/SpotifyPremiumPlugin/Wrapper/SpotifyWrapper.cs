@@ -31,9 +31,10 @@
             }
         }
 
-        public SpotifyWrapper(String cacheDirectory)
+        public SpotifyWrapper(String cacheDirectory) => this._cacheDirectory = cacheDirectory;
+
+        public void Init()
         {
-            this._cacheDirectory = cacheDirectory;
             this.StartAuth();
             this.CurrentDeviceId = this.GetCachedDeviceID();
         }
@@ -170,7 +171,7 @@
         {
             if (commandParameter == _activeDevice)
             {
-                commandParameter = String.Empty;
+                commandParameter = null;
             }
 
             this.CurrentDeviceId = commandParameter;
@@ -218,7 +219,6 @@
                     break;
 
                 default:
-                    // Set plugin status and message
                     this.OnWrapperStatusChanged(WrapperStatus.Warning, "Not able to change repeat state (check device etc.)", null);
                     break;
             }

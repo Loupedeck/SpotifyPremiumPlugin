@@ -17,7 +17,7 @@
             }
             catch (APIUnauthorizedException)
             {
-                this.StartLogin();
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Please login to Spotify. Click More Details below", "loupedeck:plugin/SpotifyPremium/callback/login");
             }
             catch (APITooManyRequestsException)
             {
@@ -39,7 +39,7 @@
             }
             catch (APIUnauthorizedException)
             {
-                this.StartLogin();
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Please login to Spotify. Click More Details below", "loupedeck:plugin/SpotifyPremium/callback/login");
             }
             catch (APITooManyRequestsException)
             {

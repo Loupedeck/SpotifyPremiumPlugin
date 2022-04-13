@@ -23,18 +23,18 @@
                 return;
             }
 
-            if (File.Exists(this.SpotifyTokenFilePath))
+            if (!File.Exists(this.SpotifyTokenFilePath))
             {
-                var token = this.ReadTokenFromLocalFile();
-                if (token != null)
-                {
-                    // Use the existing token
-                    this.InitSpotifyClient(token, configurationModel);
-                    return;
-                }
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Please login to Spotify. Click More Details below", "loupedeck:plugin/SpotifyPremium/callback/login");
+                return;
             }
 
-            this.StartLogin(configurationModel);
+            var token = this.ReadTokenFromLocalFile();
+            if (token != null)
+            {
+                // Use the existing token
+                this.InitSpotifyClient(token, configurationModel);
+            }
         }
 
         internal void StartLogin()
@@ -47,7 +47,7 @@
 
         internal void StartLogin(WrapperConfigurationModel configurationModel)
         {
-            if (!NetworkHelpers.TryGetFreeTcpPort(configurationModel.Ports, out var selectedPort))
+            if (!NetworkHelpers.TryGetFreeTcpPort(configurationModel.TcpPorts, out var selectedPort))
             {
                 Tracer.Error("No available ports for Spotify!");
                 return;
@@ -57,22 +57,33 @@
 
             server.Start();
 
-            server.AuthorizationCodeReceived += async (sender, response) =>
+            server.AuthorizationCodeReceived += (sender, response) =>
             {
                 AuthorizationCodeTokenResponse token =
-                await new OAuthClient()
+                new OAuthClient()
                             .RequestToken(
                             new AuthorizationCodeTokenRequest(
                                 configurationModel.ClientId,
-                                configurationModel.SecretId,
+                                configurationModel.ClientSecret,
                                 response.Code,
-                                server.BaseUri));
+                                server.BaseUri)).Result;
 
                 this.SaveTokenToLocalFile(token);
                 this.InitSpotifyClient(token, configurationModel);
+
+                server.Stop();
+                server.Dispose();
+                return null;
             };
 
-            var request = new LoginRequest(server.BaseUri, configurationModel.ClientId, LoginRequest.ResponseType.Token)
+            server.ErrorReceived += (sender, error, state) =>
+            {
+                server.Stop();
+                server.Dispose();
+                return null;
+            };
+
+            var request = new LoginRequest(server.BaseUri, configurationModel.ClientId, LoginRequest.ResponseType.Code)
             {
                 Scope = new[]
                 {
@@ -98,11 +109,11 @@
             }
             catch (Exception)
             {
-                // todo: add error status
-            }
+                this.OnWrapperStatusChanged(WrapperStatus.Error, "Login to Spotify failed. Click More Details below", null);
 
-            server.Stop();
-            server.Dispose();
+                server.Stop();
+                server.Dispose();
+            }
         }
 
         internal void InitSpotifyClient(IRefreshableToken refreshableToken, WrapperConfigurationModel configurationModel)
@@ -110,7 +121,7 @@
             var localToken = refreshableToken as AuthorizationCodeTokenResponse;
 
             // Refreshes token automatically on demand
-            var authenticator = new AuthorizationCodeAuthenticator(configurationModel.ClientId, configurationModel.SecretId, localToken);
+            var authenticator = new AuthorizationCodeAuthenticator(configurationModel.ClientId, configurationModel.ClientSecret, localToken);
             authenticator.TokenRefreshed += (sender, token) => this.SaveTokenToLocalFile(token);
 
             var config = SpotifyClientConfig.CreateDefault()

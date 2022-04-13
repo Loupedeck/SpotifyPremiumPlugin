@@ -35,7 +35,6 @@ namespace Loupedeck.SpotifyPremiumPlugin.CommandFolders
             this._devices = this.SpotifyPremiumPlugin.Wrapper.GetDevices();
             if (this._devices != null && this._devices.Any())
             {
-                this._devices.Add(new Device { Id = "activedevice", Name = "Active Device" });
                 return this._devices.Select(x => this.CreateCommandName(x.Id));
             }
 

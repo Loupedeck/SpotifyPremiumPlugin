@@ -11,6 +11,8 @@
     <AssemblyName>SpotifyPremiumPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <BaseIntermediateOutputPath>
@@ -22,7 +24,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>$(LocalAppData)\Loupedeck\Plugins\</OutputPath>
+    <OutputPath>..\..\..\..\Users\Loupedeck\AppData\Local\Loupedeck\Plugins\DenysSpotify\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -84,7 +86,6 @@
     <Compile Include="ParameterizedCommands\StartPlaylistCommand.cs" />
     <Compile Include="SpotifyPremiumPlugin.Statuses.cs" />
     <Compile Include="SpotifyPremiumPlugin.Installer.cs" />
-    <Compile Include="Commands\LoginToSpotifyCommand.cs" />
     <Compile Include="Commands\Playback\TogglePlaybackCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -171,6 +172,5 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
