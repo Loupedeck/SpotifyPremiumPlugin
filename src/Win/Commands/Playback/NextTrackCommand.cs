@@ -1,40 +1,17 @@
 ﻿// Copyright(c) Loupedeck.All rights reserved.
 
-namespace Loupedeck.SpotifyPremiumPlugin
+namespace Loupedeck.Plugins.SpotifyPremium.Commands.Playback
 {
-    using System;
-    using SpotifyAPI.Web.Models;
-
-    internal class NextTrackCommand : PluginDynamicCommand
+    internal class NextTrackCommand : SpotifyCommand
     {
-        private SpotifyPremiumPlugin SpotifyPremiumPlugin => this.Plugin as SpotifyPremiumPlugin;
-
         public NextTrackCommand()
-            : base(
-                  "Next Track",
-                  "Next Track description",
-                  "Playback")
+            : base("Next Track", "Next Track description", "Playback") { }
+
+        protected override void RunCommand(string actionParameter)
         {
+            Wrapper.SkipPlaybackToNext();
         }
 
-        protected override void RunCommand(String actionParameter)
-        {
-            try
-            {
-                this.SpotifyPremiumPlugin.CheckSpotifyResponse(this.SkipPlaybackToNext);
-            }
-            catch (Exception e)
-            {
-                Tracer.Trace($"Spotify NextTrackCommand action obtain an error: ", e);
-            }
-        }
-
-        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
-        {
-            var bitmapImage = EmbeddedResources.ReadImage("Loupedeck.SpotifyPremiumPlugin.Icons.Width80.NextTrack.png");
-            return bitmapImage;
-        }
-
-        public ErrorResponse SkipPlaybackToNext() => this.SpotifyPremiumPlugin.Api.SkipPlaybackToNext(this.SpotifyPremiumPlugin.CurrentDeviceId);
+        protected override string IconResource => "Loupedeck.SpotifyPremiumPlugin.Icons.Width80.NextTrack.png";
     }
 }
